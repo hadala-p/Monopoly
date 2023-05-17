@@ -1,9 +1,10 @@
-import pygame
 import os
 
-pygame.init()
+import pygame
 
-screen = pygame.display.set_mode((800, 600))
+pygame.init()
+screen_width = 1800
+screen = pygame.display.set_mode((screen_width, screen_width//2))
 clock = pygame.time.Clock()
 
 path = os.path.join(os.pardir, 'C:/Users/Piotrek/PycharmProjects/Monopoly/images')
@@ -44,6 +45,7 @@ menu_text = [font.render(str(option), True, (255, 255, 255)) for option in menu_
 menu_rects = [text.get_rect(center=(available_width // 2, available_height // 2 + i * 50)) for i, text in
               enumerate(menu_text)]
 
+
 class Pawn(pygame.sprite.Sprite):
     def __init__(self, image, px, py):
         super().__init__()
@@ -65,8 +67,6 @@ class Pawn(pygame.sprite.Sprite):
         surface.blit(self.image, self.rect)
 
 
-pawn = Pawn(IMAGES['GREENPAWN'], int(game_board_width * 1.4), int(game_board_height * 0.9))
-
 # Funkcja do obsługi menu wyboru ilości graczy
 def handle_menu():
     global num_players, selected_players
@@ -82,12 +82,27 @@ def handle_menu():
                     num_players = selected_players
                     return
 
+
 def draw_menu():
     screen.fill((255, 240, 220))
+    button_color = (0, 255, 0)  # Zielony kolor przycisków
+    text_color = (0, 0, 0)  # Kolor tekstu
+
+    # Wyświetlanie tekstu "Wybierz ilość graczy"
+    font = pygame.font.Font(None, 36)
+    text = font.render("Wybierz ilość graczy", True, text_color)
+    text_rect = text.get_rect(center=(screen_width // 2, screen_width // 4))
+    screen.blit(text, text_rect)
+
     for i, rect in enumerate(menu_rects):
-        pygame.draw.rect(screen, (0, 0, 0), rect, 2)
-        screen.blit(menu_text[i], rect)
+        pygame.draw.rect(screen, button_color, rect)
+        button_text = font.render(str(menu_options[i]), True, text_color)
+        button_text_rect = button_text.get_rect(center=rect.center)
+        screen.blit(button_text, button_text_rect)
+
     pygame.display.flip()
+
+
 
 # Wywołanie funkcji menu wyboru ilości graczy
 while num_players == 0:
@@ -95,10 +110,11 @@ while num_players == 0:
     draw_menu()
 
 # Inicjalizacja graczy
-players = [Pawn(IMAGES['GREENPAWN'], int(game_board_width * 1.4), int(game_board_height * 0.9))]
-for i in range(1, num_players):
-    player_image = IMAGES['REDPAWN'] if i % 2 == 0 else IMAGES['BLUEPAWN']
-    player = Pawn(player_image, int(game_board_width * 1.4) - i * 50, int(game_board_height * 0.9))
+players = []
+player_images = [IMAGES['GREENPAWN'], IMAGES['REDPAWN'], IMAGES['BLUEPAWN'], IMAGES['YELLOWPAWN']]
+for i in range(num_players):
+    player_image = player_images[i % len(player_images)]
+    player = Pawn(player_image, int(game_board_width * 1.4) - i * 20, int(game_board_height * 0.9))
     players.append(player)
 
 while window_open:
