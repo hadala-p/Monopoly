@@ -1,6 +1,5 @@
 import os
 import random
-import time
 
 import pygame
 
@@ -34,7 +33,6 @@ available_width, available_height = pygame.display.get_surface().get_size()
 image_aspect_ratio = game_board_image.get_width() / game_board_image.get_height()
 
 
-# Calculate game board dimensions
 def calculate_game_board_dimensions():
     if image_aspect_ratio > 1:
         game_board_width = available_width
@@ -42,7 +40,6 @@ def calculate_game_board_dimensions():
     else:
         game_board_height = available_height
         game_board_width = int(game_board_height * image_aspect_ratio)
-
     return game_board_width, game_board_height
 
 
@@ -58,6 +55,7 @@ PAWN_SIZE = (game_board_width // 13, game_board_height // 13)
 
 
 class Dice:
+
     def __init__(self, num_sides=6):
         self.num_sides = num_sides
 
@@ -66,8 +64,9 @@ class Dice:
 
 
 class Pawn(pygame.sprite.Sprite):
+
     def __init__(self, image, px, py):
-        super().__init__()
+        super().init()
         self.image = pygame.transform.scale(image, PAWN_SIZE)
         self.rect = self.image.get_rect()
         self.rect.center = px, py
@@ -89,6 +88,7 @@ class Pawn(pygame.sprite.Sprite):
 
 
 class Player:
+
     def __init__(self, image, px, py):
         self.image = pygame.transform.scale(image, PAWN_SIZE)
         self.rect = self.image.get_rect()
@@ -112,6 +112,7 @@ class Player:
 
 
 class Menu:
+
     def __init__(self):
         self.menu_rects = []
         self.num_players = 0
@@ -167,6 +168,7 @@ class Menu:
 
 
 class Board:
+
     def __init__(self, num_players):
         self.current_player_index = 0
         self.players = []
@@ -192,50 +194,44 @@ class Board:
                 player.rect.move_ip([0, game_board_height // 20])  # Przesuń gracza w dół
             self.players.append(player)
 
-    def update_players(self, keys_pressed):
-        current_player = self.players[self.current_player_index]
-        current_player.update(keys_pressed)
+    def draw_game_board(self):
+        screen.fill(BACKGROUND_COLOR)
+        screen.blit(game_board, (board_x, board_y))
+        for player in self.players:
+            player.draw(screen)
+        font = pygame.font.Font(None, 36)
+        text = font.render("Oczka", True, (0, 0, 0))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 8, SCREEN_WIDTH // 4 - 100))
+        screen.blit(text, text_rect)
 
-    def move_player(self, player, num_moves):
-        for _ in range(num_moves):
-            player.move_right()
-            time.sleep(0.1)  # Przesuwanie gracza o jedno pole w prawo
+        pygame.display.flip()
 
-    def handle_game_events(self, keys_pressed):
+    def handle_events(self):
+        keys_pressed = pygame.key.get_pressed()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.window_open = False
+                pygame.quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    dice_roll = self.roll_dice()
+                    current_player = self.players[self.current_player_index]
+                    print("Gracz", self.current_player_index + 1, "wyrzucił", dice_roll, "oczka.")
+                    self.switch_to_next_player()
 
-        if keys_pressed[pygame.K_SPACE]:
-            num_moves = self.roll_dice()  # Rzut kostką
-            current_player = self.players[self.current_player_index]
-            self.move_player(current_player, num_moves)
-            self.switch_to_next_player()
+                    # Tutaj możesz wykorzystać wartość dice_roll do zaimplementowania logiki gry
 
-    def draw_players(self, surface):
         for player in self.players:
-            player.draw(surface)
-
-    def draw_board(self):
-        screen.fill(BACKGROUND_COLOR)
-        screen.blit(game_board, (board_x, board_y))
-        self.draw_players(screen)
-        pygame.display.update()
-
-    def run_game(self):
-        while self.window_open:
-            keys_pressed = pygame.key.get_pressed()
-            self.handle_game_events(keys_pressed)
-            self.draw_board()
-            self.update_players(keys_pressed)
-            pygame.display.flip()
-            clock.tick(60)
+            player.update(keys_pressed)
 
     def start(self):
         self.initialize_players()
-        self.run_game()
+
+        while self.window_open:
+            self.handle_events()
+            self.draw_game_board()
+            clock.tick(60)
 
 
-if __name__ == '__main__':
-    game = Board(0)
-    game.menu.start()
+menu = Menu()
+menu.start()
