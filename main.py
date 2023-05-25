@@ -63,38 +63,13 @@ class Dice:
         return random.randint(1, self.num_sides)
 
 
-class Pawn(pygame.sprite.Sprite):
+class Player(pygame.sprite.Sprite):
     def __init__(self, image, px, py):
         super().__init__()
         self.image = pygame.transform.scale(image, PAWN_SIZE)
         self.rect = self.image.get_rect()
         self.rect.center = px, py
-        self.movement_speed = 5
-
-    def handle_events(self, keys_pressed):
-        self.move(keys_pressed, pygame.K_LEFT, [-self.movement_speed, 0])
-        self.move(keys_pressed, pygame.K_RIGHT, [self.movement_speed, 0])
-
-    def move(self, keys_pressed, key, movement):
-        if keys_pressed[key]:
-            self.rect.move_ip(movement)
-
-    def update(self, keys_pressed):
-        self.handle_events(keys_pressed)
-
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
-
-
-class Player:
-    def __init__(self, image, px, py):
-        self.image = pygame.transform.scale(image, PAWN_SIZE)
-        self.rect = self.image.get_rect()
-        self.rect.center = px, py
-        self.movement_speed = 5
-
-    def update(self, keys_pressed):
-        pass  # Usunięcie możliwości poruszania się na boki
+        self.current_point = 0
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -154,6 +129,7 @@ class Board:
         self.players = []
         self.player_images = [IMAGES['GREENPAWN'], IMAGES['REDPAWN'], IMAGES['BLUEPAWN'], IMAGES['YELLOWPAWN']]
         self.num_players = num_players
+        self.occupied_points = []  # Lista zajętych punktów na planszy
         self.window_open = True
         self.menu = MenuScreen()
         self.game_board_width, self.game_board_height = calculate_game_board_dimensions()
@@ -169,18 +145,41 @@ class Board:
     def initialize_players(self):
         for i in range(self.num_players):
             player_image = self.player_images[i % len(self.player_images)]
-            player = Player(player_image, int(game_board_width * 1.4) - i * 10, int(game_board_height * 0.9))
+            player = Player(player_image, int(game_board_width * 1.45) - i * 10, int(game_board_height * 0.9))
             if i % 2 == 1:
                 player.rect.move_ip([0, game_board_height // 20])
             self.players.append(player)
 
     def move_player(self, player):
         if self.dice_roll > 0:
+            points = [
+                (board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1]),  # 1 pole br
+                (board_x + (game_board_width * 0.75), board_y + game_board_height - PAWN_SIZE[1]),  # 2 skrzynia
+                (board_x + (game_board_width * 0.65), board_y + game_board_height - PAWN_SIZE[1]),  # 3 pole br
+                (board_x + (game_board_width * 0.6), board_y + game_board_height - PAWN_SIZE[1]),  # 4 podatek
+                (board_x + (game_board_width * 0.5), board_y + game_board_height - PAWN_SIZE[1]),  # 5 kolejka
+                (board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1]),  # 6 pole bl
+                (board_x + (game_board_width * 0.35), board_y + game_board_height - PAWN_SIZE[1]),  # 7 szansa
+                (board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1]),  # 8 pole bl
+                (board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1]),  # 9 pole bl
+                (board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1]), # wiezienie
+            ]
+
             for _ in range(self.dice_roll):
-                player.rect.move_ip([game_board_width // 13, 0])
-                pygame.time.wait(200)
-                self.draw_game_board()
-                clock.tick(10)
+                target_x, target_y = points[player.current_point]
+                dx = target_x - player.rect.centerx
+                dy = target_y - player.rect.centery
+                step_x = dx / 12
+                step_y = dy / 12
+
+                for _ in range(12):
+                    player.rect.move_ip([step_x, step_y])
+                    pygame.time.wait(20)
+                    self.draw_game_board()
+                    clock.tick(60)
+
+                player.rect.center = target_x, target_y
+                player.current_point = (player.current_point + 1) % len(points)
 
     def draw_game_board(self):
         screen.fill(BACKGROUND_COLOR)
