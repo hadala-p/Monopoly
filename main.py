@@ -1,6 +1,5 @@
 import os
 import random
-
 import pygame
 
 SCREEN_WIDTH = 1920
@@ -70,9 +69,36 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = px, py
         self.current_point = 0
+        self.money = 1500
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
+
+class Property:
+    def __init__(self, name, price, rent):
+        self.name = name
+        self.price = price
+        self.rent = rent
+        self.owner = None
+
+    def is_owned(self):
+        return self.owner is not None
+
+    def is_available(self):
+        return self.owner is None
+
+    def buy(self, player):
+        if self.is_available() and player.money >= self.price:
+            player.money -= self.price
+            self.owner = player
+            return True
+        return False
+
+    def pay_rent(self, player):
+        if self.is_owned() and player != self.owner:
+            player.money -= self.rent
+            self.owner.money += self.rent
 
 
 class MenuScreen:
@@ -85,7 +111,7 @@ class MenuScreen:
             self.handle_menu_events()
             self.draw_menu()
 
-        game_board = Board(self.num_players)
+        game_board = GameBoard(self.num_players)
         game_board.start()
 
     def handle_menu_events(self):
@@ -123,7 +149,7 @@ class MenuScreen:
         pygame.display.flip()
 
 
-class Board:
+class GameBoard:
     def __init__(self, num_players):
         self.current_player_index = 0
         self.players = []
@@ -134,6 +160,14 @@ class Board:
         self.menu = MenuScreen()
         self.game_board_width, self.game_board_height = calculate_game_board_dimensions()
         self.dice_roll = 0
+
+        self.properties = [
+            Property("Property 1", 200, 20),
+            Property("Property 2", 300, 30),
+            Property("Property 3", 400, 40),
+            Property("Property 4", 500, 50),
+            Property("Property 5", 600, 60),
+        ]
 
     def switch_to_next_player(self):
         self.current_player_index = (self.current_player_index + 1) % self.num_players
@@ -162,7 +196,7 @@ class Board:
                 (board_x + (game_board_width * 0.35), board_y + game_board_height - PAWN_SIZE[1]),  # 7 szansa
                 (board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1]),  # 8 pole bl
                 (board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1]),  # 9 pole bl
-                (board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1]), # wiezienie
+                (board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1]),  # wiezienie
             ]
 
             for _ in range(self.dice_roll):
@@ -181,6 +215,10 @@ class Board:
                 player.rect.center = target_x, target_y
                 player.current_point = (player.current_point + 1) % len(points)
 
+            if player.current_point > 0:
+                property_to_buy = self.properties[player.current_point - 1]
+                player.buy_property(property_to_buy)
+
     def draw_game_board(self):
         screen.fill(BACKGROUND_COLOR)
         screen.blit(game_board, (board_x, board_y))
@@ -190,6 +228,15 @@ class Board:
         text = font.render("Oczka: " + str(self.dice_roll), True, (0, 0, 0))
         text_rect = text.get_rect(center=(available_width // 8, available_width // 4 - 100))
         screen.blit(text, text_rect)
+
+        current_player = self.players[self.current_player_index]
+        player_position_text = font.render("Aktualne pole: " + str(current_player.current_point), True, (0, 0, 0))
+        player_position_rect = player_position_text.get_rect(center=(available_width // 8, available_width // 4 - 50))
+        screen.blit(player_position_text, player_position_rect)
+
+        current_player_text = font.render("Aktualny gracz: " + str(self.current_player_index + 1), True, (0, 0, 0))
+        current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_width // 4))
+        screen.blit(current_player_text, current_player_rect)
 
         pygame.display.flip()
 
