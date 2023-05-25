@@ -14,15 +14,16 @@ path = os.path.join(os.pardir, 'C:/Users/Piotrek/PycharmProjects/Monopoly/images
 
 
 def load_images(path):
-    file_names = sorted(os.listdir(path))
-    game_board_image = pygame.image.load(os.path.join(path, 'background.jpg')).convert()
-    file_names.remove('background.jpg')
     images = {}
+    file_names = sorted(os.listdir(path))
+    file_names.remove('background.jpg')
 
     for file_name in file_names:
         image_name = file_name[:-4].upper()
         image = pygame.image.load(os.path.join(path, file_name)).convert_alpha()
         images[image_name] = image
+
+    game_board_image = pygame.image.load(os.path.join(path, 'background.jpg')).convert()
 
     return game_board_image, images
 
@@ -55,7 +56,6 @@ PAWN_SIZE = (game_board_width // 13, game_board_height // 13)
 
 
 class Dice:
-
     def __init__(self, num_sides=6):
         self.num_sides = num_sides
 
@@ -64,9 +64,8 @@ class Dice:
 
 
 class Pawn(pygame.sprite.Sprite):
-
     def __init__(self, image, px, py):
-        super().init()
+        super().__init__()
         self.image = pygame.transform.scale(image, PAWN_SIZE)
         self.rect = self.image.get_rect()
         self.rect.center = px, py
@@ -88,36 +87,33 @@ class Pawn(pygame.sprite.Sprite):
 
 
 class Player:
-
     def __init__(self, image, px, py):
         self.image = pygame.transform.scale(image, PAWN_SIZE)
         self.rect = self.image.get_rect()
         self.rect.center = px, py
         self.movement_speed = 5
 
-    def move_left(self):
-        self.rect.move_ip([-self.movement_speed, 0])
-
-    def move_right(self):
-        self.rect.move_ip([self.movement_speed, 0])
-
     def update(self, keys_pressed):
-        if keys_pressed[pygame.K_LEFT]:
-            self.move_left()
-        if keys_pressed[pygame.K_RIGHT]:
-            self.move_right()
+        pass  # Usunięcie możliwości poruszania się na boki
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
 
-class Menu:
-
+class MenuScreen:
     def __init__(self):
         self.menu_rects = []
         self.num_players = 0
 
-    def handle_menu(self):
+    def start(self):
+        while self.num_players == 0:
+            self.handle_menu_events()
+            self.draw_menu()
+
+        game_board = Board(self.num_players)
+        game_board.start()
+
+    def handle_menu_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -131,10 +127,9 @@ class Menu:
 
     def draw_menu(self):
         screen.fill(BACKGROUND_COLOR)
-        button_color = (0, 255, 0)  # Zielony kolor przycisków
-        text_color = (0, 0, 0)  # Kolor tekstu
+        button_color = (0, 255, 0)
+        text_color = (0, 0, 0)
 
-        # Wyświetlanie tekstu "Wybierz ilość graczy"
         font = pygame.font.Font(None, 36)
         text = font.render("Wybierz ilość graczy", True, text_color)
         text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_WIDTH // 4 - 100))
@@ -152,47 +147,40 @@ class Menu:
 
         pygame.display.flip()
 
-    def execute_menu_action(self):
-        if self.num_players > 0:
-            print("Rozpoczynam grę dla", self.num_players, "graczy.")
-            # Tutaj dodać kod, który wykona akcję na podstawie liczby graczy, na przykład rozpocznie grę dla odpowiedniej liczby graczy.
-
-    def start(self):
-        while self.num_players == 0:
-            self.handle_menu()
-            self.draw_menu()
-
-        # przekazanie wartości num_players do obiektu Board
-        board = Board(self.num_players)
-        board.start()
-
 
 class Board:
-
     def __init__(self, num_players):
         self.current_player_index = 0
         self.players = []
         self.player_images = [IMAGES['GREENPAWN'], IMAGES['REDPAWN'], IMAGES['BLUEPAWN'], IMAGES['YELLOWPAWN']]
         self.num_players = num_players
         self.window_open = True
-        self.menu = Menu()
-        self.game_board_width = int((available_width * 2) // 3)
-        self.game_board_height = int(self.game_board_width / image_aspect_ratio)
+        self.menu = MenuScreen()
+        self.game_board_width, self.game_board_height = calculate_game_board_dimensions()
+        self.dice_roll = 0
 
     def switch_to_next_player(self):
         self.current_player_index = (self.current_player_index + 1) % self.num_players
 
     def roll_dice(self):
         dice = Dice()
-        return dice.roll()
+        self.dice_roll = dice.roll()
 
     def initialize_players(self):
         for i in range(self.num_players):
             player_image = self.player_images[i % len(self.player_images)]
             player = Player(player_image, int(game_board_width * 1.4) - i * 10, int(game_board_height * 0.9))
             if i % 2 == 1:
-                player.rect.move_ip([0, game_board_height // 20])  # Przesuń gracza w dół
+                player.rect.move_ip([0, game_board_height // 20])
             self.players.append(player)
+
+    def move_player(self, player):
+        if self.dice_roll > 0:
+            for _ in range(self.dice_roll):
+                player.rect.move_ip([game_board_width // 13, 0])
+                pygame.time.wait(200)
+                self.draw_game_board()
+                clock.tick(10)
 
     def draw_game_board(self):
         screen.fill(BACKGROUND_COLOR)
@@ -200,8 +188,8 @@ class Board:
         for player in self.players:
             player.draw(screen)
         font = pygame.font.Font(None, 36)
-        text = font.render("Oczka", True, (0, 0, 0))
-        text_rect = text.get_rect(center=(SCREEN_WIDTH // 8, SCREEN_WIDTH // 4 - 100))
+        text = font.render("Oczka: " + str(self.dice_roll), True, (0, 0, 0))
+        text_rect = text.get_rect(center=(available_width // 8, available_width // 4 - 100))
         screen.blit(text, text_rect)
 
         pygame.display.flip()
@@ -214,12 +202,11 @@ class Board:
                 pygame.quit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    dice_roll = self.roll_dice()
+                    self.roll_dice()
                     current_player = self.players[self.current_player_index]
-                    print("Gracz", self.current_player_index + 1, "wyrzucił", dice_roll, "oczka.")
+                    print("Gracz", self.current_player_index + 1, "wyrzucił", self.dice_roll, "oczka.")
+                    self.move_player(current_player)
                     self.switch_to_next_player()
-
-                    # Tutaj możesz wykorzystać wartość dice_roll do zaimplementowania logiki gry
 
         for player in self.players:
             player.update(keys_pressed)
@@ -233,5 +220,5 @@ class Board:
             clock.tick(60)
 
 
-menu = Menu()
+menu = MenuScreen()
 menu.start()
