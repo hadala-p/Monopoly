@@ -1,5 +1,6 @@
 import os
 import random
+
 import pygame
 
 SCREEN_WIDTH = 1920
@@ -52,6 +53,24 @@ game_board_y = int((available_height - game_board_height) / 2)
 board_x = available_width // 4
 board_y = int((available_height - game_board_height) / 2)
 PAWN_SIZE = (game_board_width // 13, game_board_height // 13)
+typy_pol = {
+    0: "Start",
+    1: "Pole do kupienia",
+    2: "Skrzynia",
+    3: "Pole do kupienia",
+    4: "Podatek",
+    5: "Kolejka",
+    6: "Pole do kupienia",
+    7: "Szansa",
+    8: "Pole do kupienia",
+    9: "Pole do kupienia",
+    10: "Więzienie"
+    # Dodaj inne typy pól według potrzeb
+}
+
+
+def sprawdz_typ_pola(indeks_pola):
+    return Fields[indeks_pola].name
 
 
 class Dice:
@@ -62,43 +81,70 @@ class Dice:
         return random.randint(1, self.num_sides)
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, image, px, py):
-        super().__init__()
-        self.image = pygame.transform.scale(image, PAWN_SIZE)
-        self.rect = self.image.get_rect()
-        self.rect.center = px, py
-        self.current_point = 0
-        self.money = 1500
-
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
-
-
-class Property:
-    def __init__(self, name, price, rent):
+class Field:
+    def __init__(self, name, position_x, position_y, type):
         self.name = name
+        self.position_x = position_x
+        self.position_y = position_y
+        self.type = type
+
+    def get_name(self):
+        return self.name
+
+    def get_coordinates(self):
+        return self.position_x, self.position_y
+
+    def get_type(self):
+        return self.type
+
+
+class Estate(Field):
+    def __init__(self, name, price, rent, position_x, position_y, type):
+        super.__init__(name, position_x, position_y, type)
         self.price = price
         self.rent = rent
         self.owner = None
 
-    def is_owned(self):
-        return self.owner is not None
+    def get_price(self):
+        return self.price
 
-    def is_available(self):
-        return self.owner is None
+    def get_rent(self):
+        return self.rent
 
-    def buy(self, player):
-        if self.is_available() and player.money >= self.price:
-            player.money -= self.price
-            self.owner = player
-            return True
-        return False
+    def get_owner(self):
+        return self.owner
 
-    def pay_rent(self, player):
-        if self.is_owned() and player != self.owner:
-            player.money -= self.rent
-            self.owner.money += self.rent
+    def set_owner(self, owner):
+        self.owner = owner
+
+
+Fields = [
+    Field("Frankfurt", board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1], "estate"),
+    Field("Skrzynia", board_x + (game_board_width * 0.75), board_y + game_board_height - PAWN_SIZE[1], "skrzynia"),
+    Field("Berlin", board_x + (game_board_width * 0.65), board_y + game_board_height - PAWN_SIZE[1], "state"),
+    Field("Podatek", board_x + (game_board_width * 0.6), board_y + game_board_height - PAWN_SIZE[1], "podatek"),
+    Field("Kolejka", board_x + (game_board_width * 0.5), board_y + game_board_height - PAWN_SIZE[1], "kolejka"),
+    Field("Warszawa", board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1], "estate"),
+    Field("Szansa", board_x + (game_board_width * 0.35), board_y + game_board_height - PAWN_SIZE[1], "szansa"),
+    Field("Praga", board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1], "estate"),
+    Field("Wiedeń", board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1], "Wiedeń"),
+    Field("Wiezienie", board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1], "wiezienie"),
+]
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, image, name, px, py):
+        super().__init__()
+        self.image = pygame.transform.scale(image, PAWN_SIZE)
+        self.name = name
+        self.rect = self.image.get_rect()
+        self.rect.center = px, py
+        self.current_point = 0
+
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
 
 
 class MenuScreen:
@@ -111,7 +157,8 @@ class MenuScreen:
             self.handle_menu_events()
             self.draw_menu()
 
-        game_board = GameBoard(self.num_players)
+        player_names = self.get_player_names()
+        game_board = Board(self.num_players, player_names)
         game_board.start()
 
     def handle_menu_events(self):
@@ -148,26 +195,56 @@ class MenuScreen:
 
         pygame.display.flip()
 
+    def get_player_names(self):
+        player_names = []
+        font = pygame.font.Font(None, 36)
+        text = font.render("Wprowadź nazwy graczy", True, (0, 0, 0))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_WIDTH // 4 - 100))
+        screen.blit(text, text_rect)
 
-class GameBoard:
-    def __init__(self, num_players):
+        pygame.display.flip()
+
+        for i in range(self.num_players):
+            name = ""
+            should_break = False  # Zmienna logiczna do śledzenia, czy obie pętle powinny być przerwane
+            while not should_break:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        return
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_RETURN:
+                            should_break = True  # Ustawienie zmiennej should_break na True, aby przerwać obie pętle
+                            break
+
+                        elif event.key == pygame.K_BACKSPACE:
+                            name = name[:-1]
+                        elif event.unicode.isprintable():
+                            name += event.unicode
+                screen.fill(BACKGROUND_COLOR)
+                screen.blit(text, text_rect)
+                player_name_text = font.render("Gracz {}: {}".format(i + 1, name), True, (0, 0, 0))
+                player_name_rect = player_name_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_WIDTH // 4 + i * 50))
+                screen.blit(player_name_text, player_name_rect)
+
+                pygame.display.flip()
+
+            player_names.append(name)
+
+        return player_names
+
+
+class Board:
+    def __init__(self, num_players, player_names):
         self.current_player_index = 0
         self.players = []
         self.player_images = [IMAGES['GREENPAWN'], IMAGES['REDPAWN'], IMAGES['BLUEPAWN'], IMAGES['YELLOWPAWN']]
         self.num_players = num_players
-        self.occupied_points = []  # Lista zajętych punktów na planszy
         self.window_open = True
         self.menu = MenuScreen()
         self.game_board_width, self.game_board_height = calculate_game_board_dimensions()
         self.dice_roll = 0
-
-        self.properties = [
-            Property("Property 1", 200, 20),
-            Property("Property 2", 300, 30),
-            Property("Property 3", 400, 40),
-            Property("Property 4", 500, 50),
-            Property("Property 5", 600, 60),
-        ]
+        self.player_names = player_names
 
     def switch_to_next_player(self):
         self.current_player_index = (self.current_player_index + 1) % self.num_players
@@ -179,28 +256,18 @@ class GameBoard:
     def initialize_players(self):
         for i in range(self.num_players):
             player_image = self.player_images[i % len(self.player_images)]
-            player = Player(player_image, int(game_board_width * 1.45) - i * 10, int(game_board_height * 0.9))
+            player = Player(player_image, self.player_names[i], int(game_board_width * 1.45) - i * 10,
+                            int(game_board_height * 0.9))
             if i % 2 == 1:
                 player.rect.move_ip([0, game_board_height // 20])
             self.players.append(player)
 
     def move_player(self, player):
         if self.dice_roll > 0:
-            points = [
-                (board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1]),  # 1 pole br
-                (board_x + (game_board_width * 0.75), board_y + game_board_height - PAWN_SIZE[1]),  # 2 skrzynia
-                (board_x + (game_board_width * 0.65), board_y + game_board_height - PAWN_SIZE[1]),  # 3 pole br
-                (board_x + (game_board_width * 0.6), board_y + game_board_height - PAWN_SIZE[1]),  # 4 podatek
-                (board_x + (game_board_width * 0.5), board_y + game_board_height - PAWN_SIZE[1]),  # 5 kolejka
-                (board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1]),  # 6 pole bl
-                (board_x + (game_board_width * 0.35), board_y + game_board_height - PAWN_SIZE[1]),  # 7 szansa
-                (board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1]),  # 8 pole bl
-                (board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1]),  # 9 pole bl
-                (board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1]),  # wiezienie
-            ]
+            points = Fields
 
             for _ in range(self.dice_roll):
-                target_x, target_y = points[player.current_point]
+                target_x, target_y = points[player.current_point].get_coordinates()
                 dx = target_x - player.rect.centerx
                 dy = target_y - player.rect.centery
                 step_x = dx / 12
@@ -215,9 +282,28 @@ class GameBoard:
                 player.rect.center = target_x, target_y
                 player.current_point = (player.current_point + 1) % len(points)
 
-            if player.current_point > 0:
-                property_to_buy = self.properties[player.current_point - 1]
-                player.buy_property(property_to_buy)
+            # Sprawdzenie typu pola i wykonanie odpowiednich akcji
+            typ_pola = sprawdz_typ_pola(player.current_point)
+            if typ_pola == "Pole do kupienia":
+                # Kod dla pola do kupienia
+                print("To pole można kupić.")
+
+            elif typ_pola == "Szansa":
+                # Kod dla pola Szansy
+                print("Wykonaj akcję związaną z polem Szansy.")
+
+            elif typ_pola == "Więzienie":
+                # Kod dla pola Więzienie
+                print("Jesteś w więzieniu. Wykonaj odpowiednie działania.")
+            elif typ_pola == "Podatek":
+                # Kod dla pola Podatek
+                print("Płacisz Podatek. Wykonaj odpowiednie działania.")
+            elif typ_pola == "Skrzynia":
+                # Kod dla pola Skrzynia
+                print("Otwierasz skrzynię. Wykonaj odpowiednie działania.")
+            elif typ_pola == "Kolejka":
+                # Kod dla pola Kolejka
+                print("Koljeka. Wykonaj odpowiednie działania.")
 
     def draw_game_board(self):
         screen.fill(BACKGROUND_COLOR)
@@ -230,11 +316,13 @@ class GameBoard:
         screen.blit(text, text_rect)
 
         current_player = self.players[self.current_player_index]
-        player_position_text = font.render("Aktualne pole: " + str(current_player.current_point), True, (0, 0, 0))
+        typ_polaa = sprawdz_typ_pola(current_player.current_point)
+        player_position_text = font.render("Aktualne pole: " + str(current_player.current_point) + str(typ_polaa), True,
+                                           (0, 0, 0))
         player_position_rect = player_position_text.get_rect(center=(available_width // 8, available_width // 4 - 50))
         screen.blit(player_position_text, player_position_rect)
 
-        current_player_text = font.render("Aktualny gracz: " + str(self.current_player_index + 1), True, (0, 0, 0))
+        current_player_text = font.render("Aktualny gracz: " + str(self.player_names[self.current_player_index]), True, (0, 0, 0))
         current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_width // 4))
         screen.blit(current_player_text, current_player_rect)
 
