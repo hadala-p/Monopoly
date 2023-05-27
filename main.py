@@ -1,7 +1,7 @@
+import pygame
 import os
 import random
-
-import pygame
+from MenuScreen import MenuScreen
 
 SCREEN_WIDTH = 1920
 BACKGROUND_COLOR = (255, 240, 220)
@@ -11,6 +11,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_WIDTH // 2))
 clock = pygame.time.Clock()
 
 path = os.path.join(os.pardir, 'C:/Users/Piotrek/PycharmProjects/Monopoly/images')
+menuscreen = MenuScreen()
 
 
 def load_images(path):
@@ -100,7 +101,7 @@ class Field:
 
 class Estate(Field):
     def __init__(self, name, price, rent, position_x, position_y, type):
-        super.__init__(name, position_x, position_y, type)
+        super().__init__(name, position_x, position_y, type)
         self.price = price
         self.rent = rent
         self.owner = None
@@ -119,6 +120,7 @@ class Estate(Field):
 
 
 Fields = [
+    Field("Start", board_x + (game_board_width * 0.9), board_y + game_board_height - PAWN_SIZE[1], "start"),
     Field("Frankfurt", board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1], "estate"),
     Field("Skrzynia", board_x + (game_board_width * 0.75), board_y + game_board_height - PAWN_SIZE[1], "skrzynia"),
     Field("Berlin", board_x + (game_board_width * 0.65), board_y + game_board_height - PAWN_SIZE[1], "state"),
@@ -140,98 +142,20 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = px, py
         self.current_point = 0
-
+        self.money = 1500
+        self.properties = []
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
+    def add_money(self, money):
+        self.money += money
 
+    def subtract_money(self, money):
+        self.money -= money
 
-class MenuScreen:
-    def __init__(self):
-        self.menu_rects = []
-        self.num_players = 0
-
-    def start(self):
-        while self.num_players == 0:
-            self.handle_menu_events()
-            self.draw_menu()
-
-        player_names = self.get_player_names()
-        game_board = Board(self.num_players, player_names)
-        game_board.start()
-
-    def handle_menu_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                for i, rect in enumerate(self.menu_rects):
-                    if rect.collidepoint(mouse_pos):
-                        self.num_players = i + 2
-                        return
-
-    def draw_menu(self):
-        screen.fill(BACKGROUND_COLOR)
-        button_color = (0, 255, 0)
-        text_color = (0, 0, 0)
-
-        font = pygame.font.Font(None, 36)
-        text = font.render("Wybierz ilość graczy", True, text_color)
-        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_WIDTH // 4 - 100))
-        screen.blit(text, text_rect)
-
-        self.menu_rects = []
-        menu_options = [2, 3, 4]
-        for i, option in enumerate(menu_options):
-            rect = pygame.Rect((available_width // 2) + ((i * 120) - 180), (available_height // 2), 100, 40)
-            pygame.draw.rect(screen, button_color, rect)
-            button_text = font.render(str(option), True, text_color)
-            button_text_rect = button_text.get_rect(center=rect.center)
-            screen.blit(button_text, button_text_rect)
-            self.menu_rects.append(rect)
-
-        pygame.display.flip()
-
-    def get_player_names(self):
-        player_names = []
-        font = pygame.font.Font(None, 36)
-        text = font.render("Wprowadź nazwy graczy", True, (0, 0, 0))
-        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_WIDTH // 4 - 100))
-        screen.blit(text, text_rect)
-
-        pygame.display.flip()
-
-        for i in range(self.num_players):
-            name = ""
-            should_break = False  # Zmienna logiczna do śledzenia, czy obie pętle powinny być przerwane
-            while not should_break:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        return
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_RETURN:
-                            should_break = True  # Ustawienie zmiennej should_break na True, aby przerwać obie pętle
-                            break
-
-                        elif event.key == pygame.K_BACKSPACE:
-                            name = name[:-1]
-                        elif event.unicode.isprintable():
-                            name += event.unicode
-                screen.fill(BACKGROUND_COLOR)
-                screen.blit(text, text_rect)
-                player_name_text = font.render("Gracz {}: {}".format(i + 1, name), True, (0, 0, 0))
-                player_name_rect = player_name_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_WIDTH // 4 + i * 50))
-                screen.blit(player_name_text, player_name_rect)
-
-                pygame.display.flip()
-
-            player_names.append(name)
-
-        return player_names
+    def buy_field(self, field):
+        self.properties.append(field)
 
 
 class Board:
@@ -241,8 +165,9 @@ class Board:
         self.player_images = [IMAGES['GREENPAWN'], IMAGES['REDPAWN'], IMAGES['BLUEPAWN'], IMAGES['YELLOWPAWN']]
         self.num_players = num_players
         self.window_open = True
-        self.menu = MenuScreen()
+        self.menu = menuscreen
         self.game_board_width, self.game_board_height = calculate_game_board_dimensions()
+        self.game_board = pygame.transform.scale(game_board_image, (game_board_width, game_board_height))
         self.dice_roll = 0
         self.player_names = player_names
 
@@ -264,10 +189,27 @@ class Board:
 
     def move_player(self, player):
         if self.dice_roll > 0:
-            points = Fields
+            player.current_point = (player.current_point + 1) % len(Fields)  # Aktualizacja pozycji gracza
 
-            for _ in range(self.dice_roll):
-                target_x, target_y = points[player.current_point].get_coordinates()
+            # Przesunięcie pionka o jedno pole za start
+            target_x, target_y = Fields[player.current_point].get_coordinates()
+            dx = target_x - player.rect.centerx
+            dy = target_y - player.rect.centery
+            step_x = dx / 12
+            step_y = dy / 12
+
+            for _ in range(12):
+                player.rect.move_ip([step_x, step_y])
+                pygame.time.wait(20)
+                self.draw_game_board()
+                clock.tick(60)
+
+            player.rect.center = target_x, target_y
+
+            # Przesunięcie pionka po pozostałych polach
+            for _ in range(1, self.dice_roll):
+                player.current_point = (player.current_point + 1) % len(Fields)
+                target_x, target_y = Fields[player.current_point].get_coordinates()
                 dx = target_x - player.rect.centerx
                 dy = target_y - player.rect.centery
                 step_x = dx / 12
@@ -280,7 +222,6 @@ class Board:
                     clock.tick(60)
 
                 player.rect.center = target_x, target_y
-                player.current_point = (player.current_point + 1) % len(points)
 
             # Sprawdzenie typu pola i wykonanie odpowiednich akcji
             typ_pola = sprawdz_typ_pola(player.current_point)
@@ -303,11 +244,11 @@ class Board:
                 print("Otwierasz skrzynię. Wykonaj odpowiednie działania.")
             elif typ_pola == "Kolejka":
                 # Kod dla pola Kolejka
-                print("Koljeka. Wykonaj odpowiednie działania.")
+                print("Kolejka. Wykonaj odpowiednie działania.")
 
     def draw_game_board(self):
         screen.fill(BACKGROUND_COLOR)
-        screen.blit(game_board, (board_x, board_y))
+        screen.blit(self.game_board, (board_x, board_y))
         for player in self.players:
             player.draw(screen)
         font = pygame.font.Font(None, 36)
@@ -322,7 +263,8 @@ class Board:
         player_position_rect = player_position_text.get_rect(center=(available_width // 8, available_width // 4 - 50))
         screen.blit(player_position_text, player_position_rect)
 
-        current_player_text = font.render("Aktualny gracz: " + str(self.player_names[self.current_player_index]), True, (0, 0, 0))
+        current_player_text = font.render("Aktualny gracz: " + str(self.player_names[self.current_player_index]), True,
+                                          (0, 0, 0))
         current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_width // 4))
         screen.blit(current_player_text, current_player_rect)
 
@@ -354,5 +296,7 @@ class Board:
             clock.tick(60)
 
 
-menu = MenuScreen()
+menu = menuscreen
 menu.start()
+game_board = Board(len(menu.get_players_name()), menu.get_players_name())
+game_board.start()
