@@ -41,7 +41,10 @@ game_board_image, IMAGES = load_images(path)
 
 available_width, available_height = pygame.display.get_surface().get_size()
 image_aspect_ratio = game_board_image.get_width() / game_board_image.get_height()
-DICE_IMAGES = [pygame.image.load(os.path.join(path, f'{i}.png')).convert_alpha() for i in range(1, 24)]
+DICE_IMAGES = [pygame.image.load(os.path.join(path, f'{i}.png')).convert_alpha() for i in range(1, 20)]
+scaled_images = [pygame.transform.scale(image, (available_width // 2, available_height // 2)) for image in DICE_IMAGES]
+DICE_IMAGES = scaled_images
+
 
 def calculate_game_board_dimensions():
     if image_aspect_ratio > 1:
@@ -112,9 +115,23 @@ class CommunityChest(Field):
         self.num_cards = 3
 
 
-class Chance(Field):
-    def __init__(self, name, position_x, position_y, type):
-        super().__init__(name, position_x, position_y, type)
+# class Chance(Field):
+#     def __init__(self, name, position_x, position_y, type):
+#         super().__init__(name, position_x, position_y, type)
+#         self.cards = []
+#
+#     def add_card(self, card):
+#         self.cards.append(card)
+#
+#
+# class ChanceCard:
+#     def __init__(self, name, description):
+#         self.name = name
+#         self.description = description
+#
+#     def execute_action(self, player):
+#         # Wykonaj akcję związaną z kartą szansy
+#         pass
 
 
 Fields = [
@@ -190,7 +207,9 @@ class Board:
         self.window_open = True
         self.game_board_width, self.game_board_height = calculate_game_board_dimensions()
         self.game_board = pygame.transform.scale(game_board_image, (game_board_width, game_board_height))
-        self.dice_roll = 0
+        self.dice = Dice()
+        self.dice_roll_1 = 0
+        self.dice_roll_2 = 0
         self.code_message = "0"
         self.player_names = player_names
         self.waiting_for_input = False
@@ -201,8 +220,8 @@ class Board:
         self.current_player_index = (self.current_player_index + 1) % self.num_players
 
     def roll_dice(self):
-        dice = Dice()
-        self.dice_roll = dice.roll()
+        self.dice_roll_1 = self.dice.roll()
+        self.dice_roll_2 = self.dice.roll()
         self.action = True
 
     def initialize_players(self):
@@ -244,7 +263,7 @@ class Board:
             print("Kolejka. Wykonaj odpowiednie działania.")
 
     def move_player(self, player):
-        if self.dice_roll > 0:
+        if self.dice_roll_1 > 0:
             player.current_point = (player.current_point + 1) % len(Fields)  # Aktualizacja pozycji gracza
 
             # Przesunięcie pionka o jedno pole za start
@@ -263,7 +282,7 @@ class Board:
             player.rect.center = target_x, target_y
 
             # Przesunięcie pionka po pozostałych polach
-            for _ in range(1, self.dice_roll):
+            for _ in range(1, self.dice_roll_1 + self.dice_roll_2):
                 player.current_point = (player.current_point + 1) % len(Fields)
                 target_x, target_y = Fields[player.current_point].get_coordinates()
                 dx = target_x - player.rect.centerx
@@ -295,18 +314,24 @@ class Board:
         buy_button_text_rect = buy_button_text.get_rect(center=buy_button_rect.center)
         screen.blit(buy_button_text, buy_button_text_rect)
 
-    def animate_dice_roll(self, number):
-        frames = 24  # Liczba klatek animacji
+    def animate_dice_roll(self, dice_1_dots, dice_2_dots):
+        frames = 20  # Liczba klatek animacji
         delay = 20  # Opóźnienie między klatkami w milisekundach
 
         for i in range(frames):
             self.draw_game_board()
             for player in self.players:
                 player.draw(screen)
-            dice_image = DICE_IMAGES[i - 2]
-            dice_rect = dice_image.get_rect(center=(available_width // 2, available_height // 2))
-            screen.blit(dice_image, dice_rect)
-
+            if i + 1 == frames:
+                dice_image_1 = DICE_IMAGES[dice_1_dots]
+                dice_image_2 = DICE_IMAGES[dice_2_dots]
+            else:
+                dice_image_1 = DICE_IMAGES[i - 1]
+                dice_image_2 = DICE_IMAGES[frames - i - 2]
+            dice_1_rect = dice_image_1.get_rect(center=(available_width * 0.6, available_height // 2))
+            dice_2_rect = dice_image_1.get_rect(center=(available_width * 0.4, available_height // 2))
+            screen.blit(dice_image_1, dice_1_rect)
+            screen.blit(dice_image_2, dice_2_rect)
             pygame.time.wait(delay)
             clock.tick(60)
             pygame.display.flip()
@@ -323,7 +348,7 @@ class Board:
             player.draw(screen)
 
         font = pygame.font.Font(None, FONT_SIZE)
-        text = font.render("Oczka: " + str(self.dice_roll), True, (0, 0, 0))
+        text = font.render("Oczka: " + str(self.dice_roll_1) + str(self.dice_roll_2), True, (0, 0, 0))
         text_rect = text.get_rect(center=(available_width // 8, available_width // 4 - 100))
         screen.blit(text, text_rect)
 
@@ -362,7 +387,7 @@ class Board:
         if self.code_message:
             self.draw_message(self.code_message, current_field, font)
         if self.action:
-            self.animate_dice_roll(self.dice_roll)
+            self.animate_dice_roll(self.dice_roll_1 - 1, self.dice_roll_2 - 1)
 
         pygame.display.flip()
 
