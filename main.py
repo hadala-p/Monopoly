@@ -19,6 +19,7 @@ clock = pygame.time.Clock()
 
 path = os.path.join(os.pardir, 'C:/Users/Piotrek/PycharmProjects/Monopoly/images')
 menuscreen = MenuScreen()
+pygame.display.set_caption("Monopoly")
 
 
 def load_images(path):
@@ -40,7 +41,7 @@ game_board_image, IMAGES = load_images(path)
 
 available_width, available_height = pygame.display.get_surface().get_size()
 image_aspect_ratio = game_board_image.get_width() / game_board_image.get_height()
-
+DICE_IMAGES = [pygame.image.load(os.path.join(path, f'{i}.png')).convert_alpha() for i in range(1, 24)]
 
 def calculate_game_board_dimensions():
     if image_aspect_ratio > 1:
@@ -61,7 +62,7 @@ game_board_y = int((available_height - game_board_height) / 2)
 board_x = available_width // 4
 board_y = int((available_height - game_board_height) / 2)
 PAWN_SIZE = (game_board_width // 13, game_board_height // 13)
-FONT_SIZE = available_height // 30;
+FONT_SIZE = available_height // 30
 
 
 def sprawdz_typ_pola(indeks_pola):
@@ -105,18 +106,30 @@ class Estate(Field):
         self.owner = owner
 
 
+class CommunityChest(Field):
+    def __init__(self, name, position_x, position_y, type):
+        super().__init__(name, position_x, position_y, type)
+        self.num_cards = 3
+
+
+class Chance(Field):
+    def __init__(self, name, position_x, position_y, type):
+        super().__init__(name, position_x, position_y, type)
+
+
 Fields = [
     Field("Start", board_x + (game_board_width * 0.9), board_y + game_board_height - PAWN_SIZE[1], "start"),
     Estate("Frankfurt", board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
            10),
-    Field("Skrzynia", board_x + (game_board_width * 0.75), board_y + game_board_height - PAWN_SIZE[1], "skrzynia"),
+    CommunityChest("Skrzynia", board_x + (game_board_width * 0.75), board_y + game_board_height - PAWN_SIZE[1],
+                   "skrzynia"),
     Estate("Berlin", board_x + (game_board_width * 0.65), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
            10),
     Field("Podatek", board_x + (game_board_width * 0.6), board_y + game_board_height - PAWN_SIZE[1], "podatek"),
     Field("Kolejka", board_x + (game_board_width * 0.5), board_y + game_board_height - PAWN_SIZE[1], "kolejka"),
     Estate("Warszawa", board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
            10),
-    Field("Szansa", board_x + (game_board_width * 0.35), board_y + game_board_height - PAWN_SIZE[1], "szansa"),
+    Chance("Szansa", board_x + (game_board_width * 0.35), board_y + game_board_height - PAWN_SIZE[1], "szansa"),
     Estate("Praga", board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1], "estate", 600, 10),
     Estate("Wiedeń", board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
            10),
@@ -175,12 +188,14 @@ class Board:
         self.player_images = [IMAGES['GREENPAWN'], IMAGES['REDPAWN'], IMAGES['BLUEPAWN'], IMAGES['YELLOWPAWN']]
         self.num_players = num_players
         self.window_open = True
-        self.menu = menuscreen
         self.game_board_width, self.game_board_height = calculate_game_board_dimensions()
         self.game_board = pygame.transform.scale(game_board_image, (game_board_width, game_board_height))
         self.dice_roll = 0
+        self.code_message = "0"
         self.player_names = player_names
         self.waiting_for_input = False
+        self.show_buy_button = False
+        self.action = False
 
     def switch_to_next_player(self):
         self.current_player_index = (self.current_player_index + 1) % self.num_players
@@ -188,6 +203,7 @@ class Board:
     def roll_dice(self):
         dice = Dice()
         self.dice_roll = dice.roll()
+        self.action = True
 
     def initialize_players(self):
         for i in range(self.num_players):
@@ -197,6 +213,35 @@ class Board:
             if i % 2 == 1:
                 player.rect.move_ip([0, game_board_height // 20])
             self.players.append(player)
+
+    def player_action(self, field_type, player):
+        if field_type == "estate":
+            current_field = Fields[player.current_point]
+            owner = current_field.get_owner()
+            if owner and owner != player:
+                rent = current_field.get_rent()
+                player.pay_rent(rent)
+                owner.add_money(rent)
+                self.code_message = "1"
+            elif owner is None:
+                self.show_buy_button = True
+
+        elif field_type == "szansa":
+            # Kod dla pola Szansy
+            print("Wykonaj akcję związaną z polem Szansy.")
+
+        elif field_type == "więzienie":
+            # Kod dla pola Więzienie
+            print("Jesteś w więzieniu. Wykonaj odpowiednie działania.")
+        elif field_type == "podatek":
+            # Kod dla pola Podatek
+            print("Płacisz Podatek. Wykonaj odpowiednie działania.")
+        elif field_type == "skrzynia":
+            # Kod dla pola Skrzynia
+            print("Otwierasz skrzynię. Wykonaj odpowiednie działania.")
+        elif field_type == "kolejka":
+            # Kod dla pola Kolejka
+            print("Kolejka. Wykonaj odpowiednie działania.")
 
     def move_player(self, player):
         if self.dice_roll > 0:
@@ -212,7 +257,7 @@ class Board:
             for _ in range(12):
                 player.rect.move_ip([step_x, step_y])
                 pygame.time.wait(20)
-                self.draw_game_board()
+                self.draw_game()
                 clock.tick(60)
 
             player.rect.center = target_x, target_y
@@ -229,44 +274,54 @@ class Board:
                 for _ in range(12):
                     player.rect.move_ip([step_x, step_y])
                     pygame.time.wait(20)
-                    self.draw_game_board()
+                    self.draw_game()
                     clock.tick(60)
 
                 player.rect.center = target_x, target_y
 
             # Sprawdzenie typu pola i wykonanie odpowiednich akcji
-            typ_pola = sprawdz_typ_pola(player.current_point)
-            if typ_pola == "estate":
+            self.player_action(sprawdz_typ_pola(player.current_point), player)
 
-                current_field = Fields[player.current_point]
-                owner = current_field.get_owner()
-                if owner and owner != player:
-                    rent = current_field.get_rent()
-                    player.pay_rent(rent)
-                    owner.add_money(rent)
+    def draw_message(self, code, field, font):
+        if code == "1":
+            rent_text = font.render("Płacisz " + str(field.get_rent()) + " czynszu", True, (0, 0, 0))
+            rent_rect = rent_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
+            screen.blit(rent_text, rent_rect)
 
-            elif typ_pola == "szansa":
-                # Kod dla pola Szansy
-                print("Wykonaj akcję związaną z polem Szansy.")
+    def draw_buy_button(self, field_name):
+        draw.rect(screen, BUY_BUTTON_COLOR, buy_button_rect)
+        buy_button_font = pygame.font.Font(None, FONT_SIZE // 2)
+        buy_button_text = buy_button_font.render("Kup" + field_name, True, BUY_BUTTON_TEXT_COLOR)
+        buy_button_text_rect = buy_button_text.get_rect(center=buy_button_rect.center)
+        screen.blit(buy_button_text, buy_button_text_rect)
 
-            elif typ_pola == "więzienie":
-                # Kod dla pola Więzienie
-                print("Jesteś w więzieniu. Wykonaj odpowiednie działania.")
-            elif typ_pola == "podatek":
-                # Kod dla pola Podatek
-                print("Płacisz Podatek. Wykonaj odpowiednie działania.")
-            elif typ_pola == "skrzynia":
-                # Kod dla pola Skrzynia
-                print("Otwierasz skrzynię. Wykonaj odpowiednie działania.")
-            elif typ_pola == "kolejka":
-                # Kod dla pola Kolejka
-                print("Kolejka. Wykonaj odpowiednie działania.")
+    def animate_dice_roll(self, number):
+        frames = 24  # Liczba klatek animacji
+        delay = 20  # Opóźnienie między klatkami w milisekundach
+
+        for i in range(frames):
+            self.draw_game_board()
+            for player in self.players:
+                player.draw(screen)
+            dice_image = DICE_IMAGES[i - 2]
+            dice_rect = dice_image.get_rect(center=(available_width // 2, available_height // 2))
+            screen.blit(dice_image, dice_rect)
+
+            pygame.time.wait(delay)
+            clock.tick(60)
+            pygame.display.flip()
+        pygame.time.wait(1000)
+        self.action = False
 
     def draw_game_board(self):
         screen.fill(BACKGROUND_COLOR)
         screen.blit(self.game_board, (board_x, board_y))
+
+    def draw_game(self):
+        self.draw_game_board()
         for player in self.players:
             player.draw(screen)
+
         font = pygame.font.Font(None, FONT_SIZE)
         text = font.render("Oczka: " + str(self.dice_roll), True, (0, 0, 0))
         text_rect = text.get_rect(center=(available_width // 8, available_width // 4 - 100))
@@ -301,19 +356,13 @@ class Board:
         player_properties_rect = player_properties_text.get_rect(
             center=(available_width * 0.125, available_width // 4 + 150))
         screen.blit(player_properties_text, player_properties_rect)
-
         # Sprawdź typ pola i wyświetl przycisk kupowania dla pól do kupienia
-        if typ_polaa == "estate" and current_field.get_owner() is None:
-            draw.rect(screen, BUY_BUTTON_COLOR, buy_button_rect)
-            buy_button_font = pygame.font.Font(None, FONT_SIZE // 2)
-            buy_button_text = buy_button_font.render("Kup" + current_field.name, True, BUY_BUTTON_TEXT_COLOR)
-            buy_button_text_rect = buy_button_text.get_rect(center=buy_button_rect.center)
-            screen.blit(buy_button_text, buy_button_text_rect)
-        elif isinstance(current_field,
-                        Estate) and current_field.get_owner() and current_field.get_owner() != current_player:
-            rent_text = font.render("Płacisz " + str(current_field.get_rent()) + " czynszu", True, (0, 0, 0))
-            rent_rect = rent_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
-            screen.blit(rent_text, rent_rect)
+        if self.show_buy_button:
+            self.draw_buy_button(current_field.name)
+        if self.code_message:
+            self.draw_message(self.code_message, current_field, font)
+        if self.action:
+            self.animate_dice_roll(self.dice_roll)
 
         pygame.display.flip()
 
@@ -335,6 +384,8 @@ class Board:
 
                 elif event.key == pygame.K_RIGHT and self.waiting_for_input:
                     self.waiting_for_input = False  # Zakończenie oczekiwania na wejście
+                    self.show_buy_button = False
+                    self.code_message = "0"
                     self.switch_to_next_player()
 
                 elif event.key == pygame.K_p and self.waiting_for_input:
@@ -353,6 +404,7 @@ class Board:
                             current_field.set_owner(current_player)
                             current_player.subtract_money(current_field.get_price())
                             current_player.add_property(current_field)
+                self.show_buy_button = False
 
         for player in self.players:
             player.update(keys_pressed)
@@ -362,7 +414,7 @@ class Board:
 
         while self.window_open:
             self.handle_events()
-            self.draw_game_board()
+            self.draw_game()
             clock.tick(60)
 
 
