@@ -1,10 +1,15 @@
 import os
-import random
 
 import pygame
 from pygame import draw
 
 from MenuScreen import MenuScreen
+from Dice import Dice
+from Field import Field
+from Chance import Chance
+from Estate import Estate
+from IncomeTax import IncomeTax
+from Player import Player
 
 SCREEN_WIDTH = 1920
 BACKGROUND_COLOR = (255, 240, 220)
@@ -72,115 +77,10 @@ def sprawdz_typ_pola(indeks_pola):
     return Fields[indeks_pola].type
 
 
-class Field:
-    def __init__(self, name, position_x, position_y, type):
-        self.name = name
-        self.position_x = position_x
-        self.position_y = position_y
-        self.type = type
-
-    def get_name(self):
-        return self.name
-
-    def get_coordinates(self):
-        return self.position_x, self.position_y
-
-    def get_type(self):
-        return self.type
-
-
-class Estate(Field):
-    def __init__(self, name, position_x, position_y, type, price, rent):
-        super().__init__(name, position_x, position_y, type)
-        self.price = price
-        self.rent = rent
-        self.owner = None
-
-    def get_price(self):
-        return self.price
-
-    def get_rent(self):
-        return self.rent
-
-    def get_owner(self):
-        return self.owner
-
-    def set_owner(self, owner):
-        self.owner = owner
-
-
 class CommunityChest(Field):
     def __init__(self, name, position_x, position_y, type):
         super().__init__(name, position_x, position_y, type)
         self.num_cards = 3
-
-
-class Chance(Field):
-    def __init__(self, name, position_x, position_y, type):
-        super().__init__(name, position_x, position_y, type)
-        self.cards = self.get_chance_cards()
-        self.current_card_index = 0
-
-    def add_card(self, card):
-        self.cards.append(card)
-
-    def get_chance_cards(self):
-        return [ChanceCard("Card1", "Przejdź do Warszawa"),
-                ChanceCard("Card2", "Przejdź na Start (Zabierz 200 $)"),
-                ChanceCard("Card3", "Przejdź do Illinois Avenue. Jeśli zdasz Go, odbierz 200 $"),
-                ChanceCard("Card4", "Przejdź do St. Charles Place. Jeśli zdasz Go, odbierz 200 $"),
-                ChanceCard("Card5", "Przejdź do najbliższej linii kolejowej. Jeśli go nie posiadasz, możesz go kupić"
-                                    " w banku. Jeśli są właścicielami, zapłaćcie podwójną kwotę czynszu, do którego są"
-                                    " w inny sposób uprawnieni"),
-                ChanceCard("Card6", "Żeton postępu do najbliższego Narzędzia. Jeśli go nie posiadasz, możesz go kupić"
-                                    " w banku. Jeśli posiadasz, rzuć kostką i zapłać właścicielowi łącznie"
-                                    " dziesięciokrotność wyrzuconej kwoty."),
-                ChanceCard("Card7", "Bank wypłaca Ci dywidendę w wysokości 50 $", ),
-                ChanceCard("Card8", "Cofnij się o 3 pola"),
-                ChanceCard("Card9", "Iść do więzienia. Idź bezpośrednio do więzienia, nie przechodź przez Start, nie "
-                                    "zabieraj 200 $"),
-                ChanceCard("Card10", "Dokonaj generalnych napraw całej swojej nieruchomości. Za każdy dom zapłać 25 $."
-                                     " Za każdy hotel zapłać 100 $"),
-                ChanceCard("Card11", "Kara za przekroczenie prędkości 15zł"),
-                ChanceCard("Card12", "Wybierz się na wycieczkę do Reading Railroad. Jeśli przekroczysz Start,"
-                                     " odbierz 200 $"),
-                ChanceCard("Card13", "Otrzymałeś kredyt budowlany pobierz 150zł"),
-                ChanceCard("Card13", "Zostałeś wybrany na Przewodniczącego Rady. Zapłać każdemu graczowi 50 $")]
-
-    def get_current_card(self):
-        return self.cards[self.current_card_index]
-
-    def get_random_chance_cards(self):
-        random_number = random.randint(0, len(self.cards))
-        print(random_number)
-        print(len(self.cards))
-        self.current_card_index = 13
-        return self.cards[13]
-
-
-class ChanceCard:
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
-
-    def execute_action(self, player):
-        # Wykonaj akcję związaną z kartą szansy
-        pass
-
-    def get_name(self):
-        return self.name
-
-    def get_description(self):
-        return self.description
-
-
-class IncomeTax(Field):
-    def __init__(self, name, position_x, position_y, type, tax):
-        super().__init__(name, position_x, position_y, type)
-        self.tax = tax
-
-    def get_tax(self):
-        return self.tax
 
 
 Fields = [
@@ -204,54 +104,6 @@ Fields = [
 ]
 
 
-class Dice:
-    def __init__(self, num_sides=6):
-        self.num_sides = num_sides
-
-    def roll(self):
-        return random.randint(1, self.num_sides)
-
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self, image, name, px, py):
-        super().__init__()
-        self.image = pygame.transform.scale(image, PAWN_SIZE)
-        self.name = name
-        self.rect = self.image.get_rect()
-        self.rect.center = px, py
-        self.current_point = 0
-        self.money = 3000
-        self.properties = []
-        self.in_jail = False
-
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
-
-    def get_current_point(self):
-        return self.current_point
-
-    def set_current_point(self, new_point):
-        self.current_point = new_point
-
-    def add_money(self, money):
-        self.money += money
-
-    def subtract_money(self, money):
-        self.money -= money
-
-    def get_money(self):
-        return self.money
-
-    def add_property(self, field):
-        self.properties.append(field)
-
-    def pay_rent(self, rent):
-        self.money -= rent
-
-    def jail_status(self, status):
-        self.in_jail = status
-
-
 class Board:
     def __init__(self, num_players, player_names):
         self.current_player_index = 0
@@ -264,11 +116,13 @@ class Board:
         self.dice = Dice()
         self.dice_roll_1 = 0
         self.dice_roll_2 = 0
-        self.code_message = "0"
+        self.code_message = 0
         self.player_names = player_names
         self.waiting_for_input = False
         self.show_buy_button = False
-        self.action = False
+        self.card_action = False
+        self.dice_roll_animation = False
+        self.current_card = None
 
     def switch_to_next_player(self):
         self.current_player_index = (self.current_player_index + 1) % self.num_players
@@ -276,19 +130,16 @@ class Board:
     def roll_dice(self):
         self.dice_roll_1 = self.dice.roll()
         self.dice_roll_2 = self.dice.roll()
-        self.action = True
+        self.dice_roll_animation = True
 
     def initialize_players(self):
         for i in range(self.num_players):
             player_image = self.player_images[i % len(self.player_images)]
             player = Player(player_image, self.player_names[i], int(game_board_width * 1.45) - i * 10,
-                            int(game_board_height * 0.9))
+                            int(game_board_height * 0.9), PAWN_SIZE)
             if i % 2 == 1:
                 player.rect.move_ip([0, game_board_height // 20])
             self.players.append(player)
-
-    def cards_action(self, player, card):
-        pass
 
     def player_action(self, field_type, player):
         current_field = Fields[player.current_point]
@@ -298,17 +149,19 @@ class Board:
                 rent = current_field.get_rent()
                 player.pay_rent(rent)
                 owner.add_money(rent)
-                self.code_message = "1"
+                self.code_message = 1
             elif owner is None:
                 self.show_buy_button = True
 
         elif field_type == "szansa":
+            self.code_message = 2
             current_field = Fields[player.current_point]
             current_field.get_random_chance_cards()
-            card = current_field
-            self.cards_action(player, card)
+            chance = current_field
+            self.current_card = chance.get_current_card()
+            self.card_action = True
 
-            self.code_message = "2"
+
 
         elif field_type == "więzienie":
             # Kod dla pola Więzienie
@@ -316,13 +169,19 @@ class Board:
         elif field_type == "podatek":
             tax = current_field.get_tax()
             player.subtract_money(tax)
-            self.code_message = "2"
+            self.code_message = 4
         elif field_type == "skrzynia":
             # Kod dla pola Skrzynia
             print("Otwierasz skrzynię. Wykonaj odpowiednie działania.")
         elif field_type == "kolejka":
             # Kod dla pola Kolejka
             print("Kolejka. Wykonaj odpowiednie działania.")
+
+    def player_move(self):
+        player = self.players[self.current_player_index]
+        if self.card_action:
+            self.current_card.execute_action(player,self.players, Fields)
+            self.card_action = False
 
     def move_player(self, player):
         if self.dice_roll_1 > 0:
@@ -364,19 +223,19 @@ class Board:
             self.player_action(sprawdz_typ_pola(player.current_point), player)
 
     def draw_message(self, code, field, font):
-        if code == "1":
-            rent_text = font.render("Płacisz " + str(field.get_rent()) + " czynszu", True, (0, 0, 0))
-            rent_rect = rent_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
-            screen.blit(rent_text, rent_rect)
-        if code == "2":
+        if code == 1:
+            message = ("Płacisz " + str(field.get_rent()) + " czynszu")
+
+        if code == 2:
             current_card = field.get_current_card()
             name = current_card.get_description()
-            card_text = font.render("Twoja karta: " + name, True, (0, 0, 0))
-            card_rect = card_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
-            screen.blit(card_text, card_rect)
-            rent_text = font.render("Twoja karta: " + name, True, (0, 0, 0))
-            rent_rect = rent_text.get_rect(center=(available_width * 0.5, available_width // 4 + 150))
-            screen.blit(rent_text, rent_rect)
+            message = ("Twoja karta: " + name)
+        if code == 4:
+            tax = field.get_tax()
+            message = ("Płacisz" + str(tax) + "$ podatku")
+        message_text = font.render(message, True, (0, 0, 0))
+        message_rect = message_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
+        screen.blit(message_text, message_rect)
 
     def draw_buy_button(self, field_name):
         draw.rect(screen, BUY_BUTTON_COLOR, buy_button_rect)
@@ -407,7 +266,7 @@ class Board:
             clock.tick(60)
             pygame.display.flip()
         pygame.time.wait(1000)
-        self.action = False
+        self.dice_roll_animation = False
 
     def draw_game_board(self):
         screen.fill(BACKGROUND_COLOR)
@@ -457,7 +316,7 @@ class Board:
             self.draw_buy_button(current_field.name)
         if self.code_message:
             self.draw_message(self.code_message, current_field, font)
-        if self.action:
+        if self.dice_roll_animation:
             self.animate_dice_roll(self.dice_roll_1 - 1, self.dice_roll_2 - 1)
 
         pygame.display.flip()
@@ -481,12 +340,9 @@ class Board:
                 elif event.key == pygame.K_RIGHT and self.waiting_for_input:
                     self.waiting_for_input = False  # Zakończenie oczekiwania na wejście
                     self.show_buy_button = False
-                    self.code_message = "0"
+                    self.code_message = 0
+                    self.player_move()
                     self.switch_to_next_player()
-
-                elif event.key == pygame.K_p and self.waiting_for_input:
-                    current_player = self.players[self.current_player_index]
-                    print("Posiadane pieniądze:", current_player.get_money())
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
@@ -514,7 +370,6 @@ class Board:
             clock.tick(60)
 
 
-menu = menuscreen
-menu.start()
-game_board = Board(len(menu.get_players_name()), menu.get_players_name())
-game_board.start()
+menuscreen.start()
+game_board_start = Board(len(menuscreen.get_players_name()), menuscreen.get_players_name())
+game_board_start.start()
