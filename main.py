@@ -115,23 +115,72 @@ class CommunityChest(Field):
         self.num_cards = 3
 
 
-# class Chance(Field):
-#     def __init__(self, name, position_x, position_y, type):
-#         super().__init__(name, position_x, position_y, type)
-#         self.cards = []
-#
-#     def add_card(self, card):
-#         self.cards.append(card)
-#
-#
-# class ChanceCard:
-#     def __init__(self, name, description):
-#         self.name = name
-#         self.description = description
-#
-#     def execute_action(self, player):
-#         # Wykonaj akcję związaną z kartą szansy
-#         pass
+class Chance(Field):
+    def __init__(self, name, position_x, position_y, type):
+        super().__init__(name, position_x, position_y, type)
+        self.cards = self.get_chance_cards()
+        self.current_card_index = 0
+
+    def add_card(self, card):
+        self.cards.append(card)
+
+    def get_chance_cards(self):
+        return [ChanceCard("Card1", "Przejdź do Warszawa"),
+                ChanceCard("Card2", "Przejdź na Start (Zabierz 200 $)"),
+                ChanceCard("Card3", "Przejdź do Illinois Avenue. Jeśli zdasz Go, odbierz 200 $"),
+                ChanceCard("Card4", "Przejdź do St. Charles Place. Jeśli zdasz Go, odbierz 200 $"),
+                ChanceCard("Card5", "Przejdź do najbliższej linii kolejowej. Jeśli go nie posiadasz, możesz go kupić"
+                                    " w banku. Jeśli są właścicielami, zapłaćcie podwójną kwotę czynszu, do którego są"
+                                    " w inny sposób uprawnieni"),
+                ChanceCard("Card6", "Żeton postępu do najbliższego Narzędzia. Jeśli go nie posiadasz, możesz go kupić"
+                                    " w banku. Jeśli posiadasz, rzuć kostką i zapłać właścicielowi łącznie"
+                                    " dziesięciokrotność wyrzuconej kwoty."),
+                ChanceCard("Card7", "Bank wypłaca Ci dywidendę w wysokości 50 $", ),
+                ChanceCard("Card8", "Cofnij się o 3 pola"),
+                ChanceCard("Card9", "Iść do więzienia. Idź bezpośrednio do więzienia, nie przechodź przez Start, nie "
+                                    "zabieraj 200 $"),
+                ChanceCard("Card10", "Dokonaj generalnych napraw całej swojej nieruchomości. Za każdy dom zapłać 25 $."
+                                     " Za każdy hotel zapłać 100 $"),
+                ChanceCard("Card11", "Kara za przekroczenie prędkości 15zł"),
+                ChanceCard("Card12", "Wybierz się na wycieczkę do Reading Railroad. Jeśli przekroczysz Start,"
+                                     " odbierz 200 $"),
+                ChanceCard("Card13", "Otrzymałeś kredyt budowlany pobierz 150zł"),
+                ChanceCard("Card13", "Zostałeś wybrany na Przewodniczącego Rady. Zapłać każdemu graczowi 50 $")]
+
+    def get_current_card(self):
+        return self.cards[self.current_card_index]
+
+    def get_random_chance_cards(self):
+        random_number = random.randint(0, len(self.cards))
+        print(random_number)
+        print(len(self.cards))
+        self.current_card_index = 13
+        return self.cards[13]
+
+
+class ChanceCard:
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+
+    def execute_action(self, player):
+        # Wykonaj akcję związaną z kartą szansy
+        pass
+
+    def get_name(self):
+        return self.name
+
+    def get_description(self):
+        return self.description
+
+
+class IncomeTax(Field):
+    def __init__(self, name, position_x, position_y, type, tax):
+        super().__init__(name, position_x, position_y, type)
+        self.tax = tax
+
+    def get_tax(self):
+        return self.tax
 
 
 Fields = [
@@ -142,7 +191,8 @@ Fields = [
                    "skrzynia"),
     Estate("Berlin", board_x + (game_board_width * 0.65), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
            10),
-    Field("Podatek", board_x + (game_board_width * 0.6), board_y + game_board_height - PAWN_SIZE[1], "podatek"),
+    IncomeTax("Podatek", board_x + (game_board_width * 0.6), board_y + game_board_height - PAWN_SIZE[1], "podatek",
+              200),
     Field("Kolejka", board_x + (game_board_width * 0.5), board_y + game_board_height - PAWN_SIZE[1], "kolejka"),
     Estate("Warszawa", board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
            10),
@@ -170,8 +220,9 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = px, py
         self.current_point = 0
-        self.money = 1500
+        self.money = 3000
         self.properties = []
+        self.in_jail = False
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -196,6 +247,9 @@ class Player(pygame.sprite.Sprite):
 
     def pay_rent(self, rent):
         self.money -= rent
+
+    def jail_status(self, status):
+        self.in_jail = status
 
 
 class Board:
@@ -233,9 +287,12 @@ class Board:
                 player.rect.move_ip([0, game_board_height // 20])
             self.players.append(player)
 
+    def cards_action(self, player, card):
+        pass
+
     def player_action(self, field_type, player):
+        current_field = Fields[player.current_point]
         if field_type == "estate":
-            current_field = Fields[player.current_point]
             owner = current_field.get_owner()
             if owner and owner != player:
                 rent = current_field.get_rent()
@@ -246,15 +303,20 @@ class Board:
                 self.show_buy_button = True
 
         elif field_type == "szansa":
-            # Kod dla pola Szansy
-            print("Wykonaj akcję związaną z polem Szansy.")
+            current_field = Fields[player.current_point]
+            current_field.get_random_chance_cards()
+            card = current_field
+            self.cards_action(player, card)
+
+            self.code_message = "2"
 
         elif field_type == "więzienie":
             # Kod dla pola Więzienie
             print("Jesteś w więzieniu. Wykonaj odpowiednie działania.")
         elif field_type == "podatek":
-            # Kod dla pola Podatek
-            print("Płacisz Podatek. Wykonaj odpowiednie działania.")
+            tax = current_field.get_tax()
+            player.subtract_money(tax)
+            self.code_message = "2"
         elif field_type == "skrzynia":
             # Kod dla pola Skrzynia
             print("Otwierasz skrzynię. Wykonaj odpowiednie działania.")
@@ -305,6 +367,15 @@ class Board:
         if code == "1":
             rent_text = font.render("Płacisz " + str(field.get_rent()) + " czynszu", True, (0, 0, 0))
             rent_rect = rent_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
+            screen.blit(rent_text, rent_rect)
+        if code == "2":
+            current_card = field.get_current_card()
+            name = current_card.get_description()
+            card_text = font.render("Twoja karta: " + name, True, (0, 0, 0))
+            card_rect = card_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
+            screen.blit(card_text, card_rect)
+            rent_text = font.render("Twoja karta: " + name, True, (0, 0, 0))
+            rent_rect = rent_text.get_rect(center=(available_width * 0.5, available_width // 4 + 150))
             screen.blit(rent_text, rent_rect)
 
     def draw_buy_button(self, field_name):
