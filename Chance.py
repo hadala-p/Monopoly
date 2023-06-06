@@ -34,13 +34,13 @@ class Chance(Field):
                 ChanceCard("Card12", "Wybierz się na wycieczkę do Reading Railroad. Jeśli przekroczysz Start,"
                                      " odbierz 200 $"),
                 ChanceCard("Card13", "Otrzymałeś kredyt budowlany pobierz 150zł"),
-                ChanceCard("Card13", "Zostałeś wybrany na Przewodniczącego Rady. Zapłać każdemu graczowi 50 $")]
+                ChanceCard("Card14", "Zostałeś wybrany na Przewodniczącego Rady. Zapłać każdemu graczowi 50 $")]
 
     def get_current_card(self):
         return self.cards[self.current_card_index]
 
     def get_random_chance_cards(self):
-        random_number = random.randint(0, len(self.cards))
-        self.current_card_index = 6
-        return self.cards[6]
+        random_number = random.randint(0, len(self.cards) - 1)
+        self.current_card_index = random_number
+        return self.cards[random_number]
 

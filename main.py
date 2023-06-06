@@ -126,6 +126,9 @@ class Board:
 
     def switch_to_next_player(self):
         self.current_player_index = (self.current_player_index + 1) % self.num_players
+        if self.players[self.current_player_index].in_jail:
+            self.players[self.current_player_index].in_jail = False
+            self.current_player_index = (self.current_player_index + 1) % self.num_players
 
     def roll_dice(self):
         self.dice_roll_1 = self.dice.roll()
@@ -180,7 +183,7 @@ class Board:
     def player_move(self):
         player = self.players[self.current_player_index]
         if self.card_action:
-            self.current_card.execute_action(player,self.players, Fields)
+            self.current_card.execute_action(player, self.players, Fields)
             self.card_action = False
 
     def move_player(self, player):
@@ -226,13 +229,15 @@ class Board:
         if code == 1:
             message = ("Płacisz " + str(field.get_rent()) + " czynszu")
 
-        if code == 2:
+        elif code == 2:
             current_card = field.get_current_card()
-            name = current_card.get_description()
-            message = ("Twoja karta: " + name)
-        if code == 4:
+            description = current_card.get_description()
+            message = ("Twoja karta: " + description)
+        elif code == 4:
             tax = field.get_tax()
             message = ("Płacisz" + str(tax) + "$ podatku")
+        else:
+            message = ""
         message_text = font.render(message, True, (0, 0, 0))
         message_rect = message_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
         screen.blit(message_text, message_rect)
@@ -278,6 +283,30 @@ class Board:
             player.draw(screen)
 
         font = pygame.font.Font(None, FONT_SIZE)
+        proportion = 0.015
+        for player in self.players:
+            current_player = player
+            current_player_text = font.render("gracz: " + str(current_player.name), True, (0, 0, 0))
+            current_player_rect = current_player_text.get_rect(
+                center=(available_width * 0.9, available_height * proportion))
+            proportion = proportion + 0.030
+            screen.blit(current_player_text, current_player_rect)
+            money_text = font.render("Pieniądze: " + str(current_player.money), True, (0, 0, 0))
+            money_rect = money_text.get_rect(center=(available_width * 0.9, available_height * proportion))
+            proportion = proportion + 0.030
+            screen.blit(money_text, money_rect)
+            player_properties_text = font.render("Posiadane własności: ", True, (0, 0, 0))
+            player_properties_rect = player_properties_text.get_rect(
+                center=(available_width * 0.9, available_height * proportion))
+            proportion = proportion + 0.030
+            screen.blit(player_properties_text, player_properties_rect)
+            player_properties_text = font.render(", ".join([prop.get_name() for prop in current_player.properties]),
+                                                 True, (0, 0, 0))
+            player_properties_rect = player_properties_text.get_rect(
+                center=(available_width * 0.9, available_height * proportion))
+            proportion = proportion + 0.18
+            screen.blit(player_properties_text, player_properties_rect)
+
         text = font.render("Oczka: " + str(self.dice_roll_1) + str(self.dice_roll_2), True, (0, 0, 0))
         text_rect = text.get_rect(center=(available_width // 8, available_width // 4 - 100))
         screen.blit(text, text_rect)

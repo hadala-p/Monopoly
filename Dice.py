@@ -7,6 +7,4 @@ class Dice:
         self.num_sides = num_sides
 
     def roll(self):
-        #return random.randint(1, self.num_sides)
-        return 9
-
+        return random.randint(1, self.num_sides)
