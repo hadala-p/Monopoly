@@ -3,6 +3,7 @@ import os
 import pygame
 from pygame import draw
 
+from CommunityChest import CommunityChest
 from MenuScreen import MenuScreen
 from Dice import Dice
 from Field import Field
@@ -22,7 +23,7 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_WIDTH // 2))
 clock = pygame.time.Clock()
 
-path = os.path.join(os.pardir, 'C:/Users/Piotrek/PycharmProjects/Monopoly/images')
+path = os.path.join(os.pardir, 'C:/Users/Janno/PycharmProjects/Monopoly_Lenovo/images')
 menuscreen = MenuScreen()
 pygame.display.set_caption("Monopoly")
 
@@ -77,30 +78,57 @@ def sprawdz_typ_pola(indeks_pola):
     return Fields[indeks_pola].type
 
 
-class CommunityChest(Field):
-    def __init__(self, name, position_x, position_y, type):
-        super().__init__(name, position_x, position_y, type)
-        self.num_cards = 3
-
-
 Fields = [
     Field("Start", board_x + (game_board_width * 0.9), board_y + game_board_height - PAWN_SIZE[1], "start"),
-    Estate("Frankfurt", board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
+    Estate("Frankfurt", board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1], "estate", 60,
            10),
-    CommunityChest("Skrzynia", board_x + (game_board_width * 0.75), board_y + game_board_height - PAWN_SIZE[1],
-                   "skrzynia"),
-    Estate("Berlin", board_x + (game_board_width * 0.65), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
+    CommunityChest("Skrzynia", board_x + (game_board_width * 0.73), board_y + game_board_height - PAWN_SIZE[1],
+                   "chance"),
+    Estate("Berlin", board_x + (game_board_width * 0.64), board_y + game_board_height - PAWN_SIZE[1], "estate", 60,
            10),
-    IncomeTax("Podatek", board_x + (game_board_width * 0.6), board_y + game_board_height - PAWN_SIZE[1], "podatek",
-              200),
-    Field("Kolejka", board_x + (game_board_width * 0.5), board_y + game_board_height - PAWN_SIZE[1], "kolejka"),
-    Estate("Warszawa", board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
+    IncomeTax("Podatek", board_x + (game_board_width * 0.56), board_y + game_board_height - PAWN_SIZE[1], "tax", 200),
+    Field("Kolejka", board_x + (game_board_width * 0.48), board_y + game_board_height - PAWN_SIZE[1], "kolejka"),
+    Estate("Warszawa", board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1], "estate", 100,
            10),
-    Chance("Szansa", board_x + (game_board_width * 0.35), board_y + game_board_height - PAWN_SIZE[1], "szansa"),
-    Estate("Praga", board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1], "estate", 600, 10),
-    Estate("Wiedeń", board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1], "estate", 600,
+    Chance("Szansa", board_x + (game_board_width * 0.32), board_y + game_board_height - PAWN_SIZE[1], "chance"),
+    Estate("Praga", board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1], "estate", 100, 10),
+    Estate("Wiedeń", board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1], "estate", 120,
            10),
-    Field("Wiezienie", board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1], "wiezienie"),
+    Field("Wiezienie", board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1], "jail"),
+    Estate("Muszyna", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.8), "estate", 140, 10),
+    IncomeTax("Podatek", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.7), "tax", 150),
+    Estate("Krynica", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.65), "estate", 140, 10),
+    Estate("Powroźnik", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.55), "estate", 160, 10),
+    Field("Kolejka", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.46), "kolejka"),
+    Estate("Krzyżówka", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.38), "estate", 180,
+           10),
+    CommunityChest("Skrzynia", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.3),
+                   "chance"),
+    Estate("Nowawies", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.22), "estate", 180,
+           10),
+    Estate("Nawojowa", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.15), "estate", 200,
+           10),
+    Field("Darmowy Parking", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.03), "parking"),
+    Estate("Nowy Sącz", board_x + (game_board_width * 0.17), board_y + (game_board_height * 0.03), "estate", 220, 10),
+    Chance("Szansa", board_x + (game_board_width * 0.25), board_y + (game_board_height * 0.03), "chance"),
+    Estate("Kraków", board_x + (game_board_width * 0.32), board_y + (game_board_height * 0.03), "estate", 220, 10),
+    Estate("Wrocław", board_x + (game_board_width * 0.4), board_y + (game_board_height * 0.03), "estate", 240, 10),
+    Field("Kolejka", board_x + (game_board_width * 0.48), board_y + (game_board_height * 0.03), "kolejka"),
+    Estate("Opole", board_x + (game_board_width * 0.56), board_y + (game_board_height * 0.03), "estate", 260, 10),
+    Estate("Katowice", board_x + (game_board_width * 0.64), board_y + (game_board_height * 0.03), "estate", 260, 10),
+    IncomeTax("Podatek", board_x + (game_board_width * 0.73), board_y + (game_board_height * 0.03), "tax", 150),
+    Estate("Lublin", board_x + (game_board_width * 0.8), board_y + (game_board_height * 0.03), "estate", 280, 10),
+    Field("Więzienie", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.03), "go_to_jail"),
+    Estate("Gdańsk", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.15), "estate", 300, 10),
+    Estate("Szczecin", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.22), "estate", 300, 10),
+    CommunityChest("Skrzynia", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.3),
+                   "chance"),
+    Estate("Gdynia", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.38), "estate", 320, 10),
+    Field("Kolejka", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.46), "kolejka"),
+    Chance("Szansa", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.55), "chance"),
+    Estate("Poznań", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.65), "estate", 350, 10),
+    IncomeTax("Podatek", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.7), "tax", 150),
+    Estate("Toruń", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.8), "estate", 400, 10),
 ]
 
 
@@ -131,8 +159,9 @@ class Board:
             self.current_player_index = (self.current_player_index + 1) % self.num_players
 
     def roll_dice(self):
-        self.dice_roll_1 = self.dice.roll()
-        self.dice_roll_2 = self.dice.roll()
+        #self.dice_roll_1 = self.dice.roll()
+        self.dice_roll_1 = 19
+        self.dice_roll_2 = 19
         self.dice_roll_animation = True
 
     def initialize_players(self):
@@ -156,7 +185,7 @@ class Board:
             elif owner is None:
                 self.show_buy_button = True
 
-        elif field_type == "szansa":
+        elif field_type == "chance":
             self.code_message = 2
             current_field = Fields[player.current_point]
             current_field.get_random_chance_cards()
@@ -164,18 +193,22 @@ class Board:
             self.current_card = chance.get_current_card()
             self.card_action = True
 
-
-
-        elif field_type == "więzienie":
-            # Kod dla pola Więzienie
-            print("Jesteś w więzieniu. Wykonaj odpowiednie działania.")
-        elif field_type == "podatek":
+        elif field_type == "go_to_jail":
+            self.code_message = 3
+            player.current_point = 10
+            player.rect.center = Fields[10].get_coordinates()
+            player.in_jail = True
+        elif field_type == "tax":
             tax = current_field.get_tax()
             player.subtract_money(tax)
             self.code_message = 4
-        elif field_type == "skrzynia":
-            # Kod dla pola Skrzynia
-            print("Otwierasz skrzynię. Wykonaj odpowiednie działania.")
+        elif field_type == "chest":
+            self.code_message = 2
+            current_field = Fields[player.current_point]
+            current_field.get_random_chance_cards()
+            chance = current_field
+            self.current_card = chance.get_current_card()
+            self.card_action = True
         elif field_type == "kolejka":
             # Kod dla pola Kolejka
             print("Kolejka. Wykonaj odpowiednie działania.")
@@ -233,6 +266,8 @@ class Board:
             current_card = field.get_current_card()
             description = current_card.get_description()
             message = ("Twoja karta: " + description)
+        elif code == 3:
+            message = "Idziesz do więzienia"
         elif code == 4:
             tax = field.get_tax()
             message = ("Płacisz" + str(tax) + "$ podatku")
@@ -360,7 +395,10 @@ class Board:
                 pygame.quit()
 
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not self.waiting_for_input:
+                if event.key == pygame.K_ESCAPE:
+                    self.window_open = False
+                    pygame.quit()
+                elif event.key == pygame.K_SPACE and not self.waiting_for_input:
                     self.roll_dice()
                     current_player = self.players[self.current_player_index]
                     self.move_player(current_player)
@@ -373,7 +411,7 @@ class Board:
                     self.player_move()
                     self.switch_to_next_player()
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if buy_button_rect.collidepoint(mouse_pos):
                     # Kod wykonujący kupno pola

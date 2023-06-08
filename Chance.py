@@ -24,7 +24,7 @@ class Chance(Field):
                 ChanceCard("Card6", "Żeton postępu do najbliższego Narzędzia. Jeśli go nie posiadasz, możesz go kupić"
                                     " w banku. Jeśli posiadasz, rzuć kostką i zapłać właścicielowi łącznie"
                                     " dziesięciokrotność wyrzuconej kwoty."),
-                ChanceCard("Card7", "Bank wypłaca Ci dywidendę w wysokości 50 $", ),
+                ChanceCard("Card7", "Bank wypłaca Ci dywidendę w wysokości 50 $"),
                 ChanceCard("Card8", "Cofnij się o 3 pola"),
                 ChanceCard("Card9", "Iść do więzienia. Idź bezpośrednio do więzienia, nie przechodź przez Start, nie "
                                     "zabieraj 200 $"),
