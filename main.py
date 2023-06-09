@@ -4,6 +4,8 @@ import pygame
 from pygame import draw
 
 from CommunityChest import CommunityChest
+from GameRatio import available_width, available_height, calculate_game_board_dimensions
+from LoadImages import load_images, get_dice_images
 from MenuScreen import MenuScreen
 from Dice import Dice
 from Field import Field
@@ -18,7 +20,7 @@ BUY_BUTTON_WIDTH = 100
 BUY_BUTTON_HEIGHT = 40
 BUY_BUTTON_COLOR = (0, 255, 0)
 BUY_BUTTON_TEXT_COLOR = (255, 255, 255)
-buy_button_rect = pygame.Rect(100, 100, BUY_BUTTON_WIDTH, BUY_BUTTON_HEIGHT)
+DICE_IMAGES = get_dice_images()
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_WIDTH // 2))
 clock = pygame.time.Clock()
@@ -28,41 +30,17 @@ menuscreen = MenuScreen()
 pygame.display.set_caption("Monopoly")
 
 
-def load_images(path):
-    images = {}
-    file_names = sorted(os.listdir(path))
-    file_names.remove('background.jpg')
 
-    for file_name in file_names:
-        image_name = file_name[:-4].upper()
-        image = pygame.image.load(os.path.join(path, file_name)).convert_alpha()
-        images[image_name] = image
-
-    game_board_image = pygame.image.load(os.path.join(path, 'background.jpg')).convert()
-
-    return game_board_image, images
 
 
 game_board_image, IMAGES = load_images(path)
 
-available_width, available_height = pygame.display.get_surface().get_size()
-image_aspect_ratio = game_board_image.get_width() / game_board_image.get_height()
-DICE_IMAGES = [pygame.image.load(os.path.join(path, f'{i}.png')).convert_alpha() for i in range(1, 20)]
-scaled_images = [pygame.transform.scale(image, (available_width // 2, available_height // 2)) for image in DICE_IMAGES]
-DICE_IMAGES = scaled_images
 
 
-def calculate_game_board_dimensions():
-    if image_aspect_ratio > 1:
-        game_board_width = available_width
-        game_board_height = int(game_board_width / image_aspect_ratio)
-    else:
-        game_board_height = available_height
-        game_board_width = int(game_board_height * image_aspect_ratio)
-    return game_board_width, game_board_height
 
-
+buy_button_rect = pygame.Rect(100, 100, available_width * 0.1, available_height * 0.05)
 game_board_width, game_board_height = calculate_game_board_dimensions()
+
 
 game_board = pygame.transform.scale(game_board_image, (game_board_width, game_board_height))
 game_board_x = int((available_width - game_board_width) / 2)
@@ -80,55 +58,55 @@ def sprawdz_typ_pola(indeks_pola):
 
 Fields = [
     Field("Start", board_x + (game_board_width * 0.9), board_y + game_board_height - PAWN_SIZE[1], "start"),
-    Estate("Frankfurt", board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1], "estate", 60,
+    Estate("Białystok", board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1], "estate", 60,
            10),
     CommunityChest("Skrzynia", board_x + (game_board_width * 0.73), board_y + game_board_height - PAWN_SIZE[1],
                    "chance"),
-    Estate("Berlin", board_x + (game_board_width * 0.64), board_y + game_board_height - PAWN_SIZE[1], "estate", 60,
+    Estate("Bełchatów", board_x + (game_board_width * 0.64), board_y + game_board_height - PAWN_SIZE[1], "estate", 60,
            10),
     IncomeTax("Podatek", board_x + (game_board_width * 0.56), board_y + game_board_height - PAWN_SIZE[1], "tax", 200),
     Field("Kolejka", board_x + (game_board_width * 0.48), board_y + game_board_height - PAWN_SIZE[1], "kolejka"),
-    Estate("Warszawa", board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1], "estate", 100,
+    Estate("Lublin", board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1], "estate", 100,
            10),
     Chance("Szansa", board_x + (game_board_width * 0.32), board_y + game_board_height - PAWN_SIZE[1], "chance"),
-    Estate("Praga", board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1], "estate", 100, 10),
-    Estate("Wiedeń", board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1], "estate", 120,
+    Estate("Katowice", board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1], "estate", 100, 10),
+    Estate("Kraków", board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1], "estate", 120,
            10),
     Field("Wiezienie", board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1], "jail"),
-    Estate("Muszyna", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.8), "estate", 140, 10),
-    IncomeTax("Podatek", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.7), "tax", 150),
-    Estate("Krynica", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.65), "estate", 140, 10),
-    Estate("Powroźnik", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.55), "estate", 160, 10),
+    Estate("Toruń", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.8), "estate", 140, 10),
+    IncomeTax("Łódź", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.7), "tax", 150),
+    Estate("Elbląg", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.65), "estate", 140, 10),
+    Estate("Szczecin", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.55), "estate", 160, 10),
     Field("Kolejka", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.46), "kolejka"),
-    Estate("Krzyżówka", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.38), "estate", 180,
+    Estate("Bydgoszcz", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.38), "estate", 180,
            10),
     CommunityChest("Skrzynia", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.3),
                    "chance"),
-    Estate("Nowawies", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.22), "estate", 180,
+    Estate("Tarnów", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.22), "estate", 180,
            10),
-    Estate("Nawojowa", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.15), "estate", 200,
+    Estate("Wrocław", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.15), "estate", 200,
            10),
     Field("Darmowy Parking", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.03), "parking"),
-    Estate("Nowy Sącz", board_x + (game_board_width * 0.17), board_y + (game_board_height * 0.03), "estate", 220, 10),
+    Estate("Kalisz", board_x + (game_board_width * 0.17), board_y + (game_board_height * 0.03), "estate", 220, 10),
     Chance("Szansa", board_x + (game_board_width * 0.25), board_y + (game_board_height * 0.03), "chance"),
-    Estate("Kraków", board_x + (game_board_width * 0.32), board_y + (game_board_height * 0.03), "estate", 220, 10),
-    Estate("Wrocław", board_x + (game_board_width * 0.4), board_y + (game_board_height * 0.03), "estate", 240, 10),
+    Estate("Gdynia", board_x + (game_board_width * 0.32), board_y + (game_board_height * 0.03), "estate", 220, 10),
+    Estate("Poznań", board_x + (game_board_width * 0.4), board_y + (game_board_height * 0.03), "estate", 240, 10),
     Field("Kolejka", board_x + (game_board_width * 0.48), board_y + (game_board_height * 0.03), "kolejka"),
     Estate("Opole", board_x + (game_board_width * 0.56), board_y + (game_board_height * 0.03), "estate", 260, 10),
     Estate("Katowice", board_x + (game_board_width * 0.64), board_y + (game_board_height * 0.03), "estate", 260, 10),
     IncomeTax("Podatek", board_x + (game_board_width * 0.73), board_y + (game_board_height * 0.03), "tax", 150),
-    Estate("Lublin", board_x + (game_board_width * 0.8), board_y + (game_board_height * 0.03), "estate", 280, 10),
+    Estate("Rzeszów", board_x + (game_board_width * 0.8), board_y + (game_board_height * 0.03), "estate", 280, 10),
     Field("Więzienie", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.03), "go_to_jail"),
     Estate("Gdańsk", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.15), "estate", 300, 10),
-    Estate("Szczecin", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.22), "estate", 300, 10),
+    Estate("", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.22), "estate", 300, 10),
     CommunityChest("Skrzynia", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.3),
                    "chance"),
-    Estate("Gdynia", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.38), "estate", 320, 10),
+    Estate("Kielce", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.38), "estate", 320, 10),
     Field("Kolejka", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.46), "kolejka"),
     Chance("Szansa", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.55), "chance"),
-    Estate("Poznań", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.65), "estate", 350, 10),
+    Estate("Olsztyn", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.65), "estate", 350, 10),
     IncomeTax("Podatek", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.7), "tax", 150),
-    Estate("Toruń", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.8), "estate", 400, 10),
+    Estate("Warszawa", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.8), "estate", 400, 10),
 ]
 
 
@@ -160,8 +138,8 @@ class Board:
 
     def roll_dice(self):
         #self.dice_roll_1 = self.dice.roll()
-        self.dice_roll_1 = 19
-        self.dice_roll_2 = 19
+        self.dice_roll_1 = 1
+        self.dice_roll_2 = 2
         self.dice_roll_animation = True
 
     def initialize_players(self):
@@ -280,7 +258,7 @@ class Board:
     def draw_buy_button(self, field_name):
         draw.rect(screen, BUY_BUTTON_COLOR, buy_button_rect)
         buy_button_font = pygame.font.Font(None, FONT_SIZE // 2)
-        buy_button_text = buy_button_font.render("Kup" + field_name, True, BUY_BUTTON_TEXT_COLOR)
+        buy_button_text = buy_button_font.render("Kup " + field_name, True, BUY_BUTTON_TEXT_COLOR)
         buy_button_text_rect = buy_button_text.get_rect(center=buy_button_rect.center)
         screen.blit(buy_button_text, buy_button_text_rect)
 
@@ -293,7 +271,7 @@ class Board:
             for player in self.players:
                 player.draw(screen)
             if i + 1 == frames:
-                dice_image_1 = DICE_IMAGES[dice_1_dots]
+                dice_image_1 = get_dice_images[dice_1_dots]
                 dice_image_2 = DICE_IMAGES[dice_2_dots]
             else:
                 dice_image_1 = DICE_IMAGES[i - 1]

@@ -4,9 +4,9 @@ import pygame
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, image, name, px, py, Pawn_size):
+    def __init__(self, image, name, px, py, pawn_size):
         super().__init__()
-        self.image = pygame.transform.scale(image, Pawn_size)
+        self.image = pygame.transform.scale(image, pawn_size)
         self.name = name
         self.rect = self.image.get_rect()
         self.rect.center = px, py

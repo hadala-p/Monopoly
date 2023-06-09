@@ -1,6 +1,8 @@
 import pygame
 import os
 
+from LoadImages import load_images
+
 SCREEN_WIDTH = 1920
 BACKGROUND_COLOR = (255, 240, 200)
 
@@ -10,20 +12,6 @@ clock = pygame.time.Clock()
 
 path = os.path.join(os.pardir, 'C:/Users/Janno/PycharmProjects/Monopoly_Lenovo/images')
 
-
-def load_images(path):
-    images = {}
-    file_names = sorted(os.listdir(path))
-    file_names.remove('background.jpg')
-
-    for file_name in file_names:
-        image_name = file_name[:-4].upper()
-        image = pygame.image.load(os.path.join(path, file_name)).convert_alpha()
-        images[image_name] = image
-
-    game_board_image = pygame.image.load(os.path.join(path, 'background.jpg')).convert()
-
-    return game_board_image, images
 
 
 game_board_image, IMAGES = load_images(path)
