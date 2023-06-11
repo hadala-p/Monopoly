@@ -2,10 +2,12 @@ import os
 
 import pygame
 
-from GameRatio import available_width, available_height
+import GameRatio
+
+path = os.path.join(os.pardir, 'C:/Users/Janno/PycharmProjects/Monopoly_Lenovo/images')
 
 
-def load_images(path):
+def load_images():
     images = {}
     file_names = sorted(os.listdir(path))
     file_names.remove('background.jpg')
@@ -20,9 +22,22 @@ def load_images(path):
     return game_board_image, images
 
 
-def get_dice_images(path):
+def get_dice_images():
     dice_images = [pygame.image.load(os.path.join(path, f'{i}.png')).convert_alpha() for i in range(1, 20)]
-    scaled_images = [pygame.transform.scale(image, (available_width // 2, available_height // 2)) for image in
+    scaled_images = [pygame.transform.scale(image, (GameRatio.get_width() // 2, GameRatio.get_height() // 2)) for image
+                     in
                      dice_images]
     dice_images = scaled_images
     return dice_images
+
+
+def chance_card_image():
+    card_image = pygame.image.load(os.path.join(path, 'chance_card.png')).convert_alpha()
+    card_image_2 = pygame.image.load(os.path.join(path, 'chance_card_2.png')).convert_alpha()
+    return card_image, card_image_2
+
+
+def chest_card_image():
+    card_image = pygame.image.load(os.path.join(path, 'community_card.png')).convert_alpha()
+    card_image_2 = pygame.image.load(os.path.join(path, 'community_card_2.png')).convert_alpha()
+    return card_image, card_image_2

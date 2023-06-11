@@ -18,7 +18,7 @@ class CommunityChest(Field):
                 CommunityCard("Card2", "Błąd banku na Twoją korzyść. Zabierz 200 $"),
                 CommunityCard("Card3", "Opłata lekarza. Zapłać 50 $"),
                 CommunityCard("Card4", "Ze sprzedaży akcji otrzymujesz 50 $"),
-                CommunityCard("Card5", "Idziesz do więzienia. Idź prosto do więzienia, nie przekraczasz Start,"
+                CommunityCard("Card5", "Idziesz do więzienia. Idź prosto do więzienia, nie przekraczasz Start,\n"
                                        " nie zabierasz 200 $"),
                 CommunityCard("Card6", "Należy ci się fundusz urlopowy. Otrzymujesz 100 $"),
                 CommunityCard("Card7", "Zwrot podatku dochodowego. Zabierz 20 $"),

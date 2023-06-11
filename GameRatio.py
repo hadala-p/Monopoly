@@ -1,6 +1,10 @@
 import pygame
 
+from LoadImages import load_images
+SCREEN_WIDTH = 1920
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_WIDTH // 2))
 available_width, available_height = pygame.display.get_surface().get_size()
+game_board_image, IMAGES = load_images()
 image_aspect_ratio = game_board_image.get_width() / game_board_image.get_height()
 
 def get_width():

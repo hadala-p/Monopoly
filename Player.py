@@ -17,6 +17,8 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+    def get_name(self):
+        return self.name
 
     def get_current_point(self):
         return self.current_point

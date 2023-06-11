@@ -18,7 +18,7 @@ class Chance(Field):
                 ChanceCard("Card2", "Przejdź na Start (Zabierz 200 $)"),
                 ChanceCard("Card3", "Przejdź do Illinois Avenue. Jeśli zdasz Go, odbierz 200 $"),
                 ChanceCard("Card4", "Przejdź do St. Charles Place. Jeśli zdasz Go, odbierz 200 $"),
-                ChanceCard("Card5", "Przejdź do najbliższej linii kolejowej. Jeśli go nie posiadasz, możesz go kupić"
+                ChanceCard("Card5", "Przejdź do najbliższej linii kolejowej. Jeśli go nie posiadasz, możesz go kupić\n"
                                     " w banku. Jeśli są właścicielami, zapłaćcie podwójną kwotę czynszu, do którego są"
                                     " w inny sposób uprawnieni"),
                 ChanceCard("Card6", "Żeton postępu do najbliższego Narzędzia. Jeśli go nie posiadasz, możesz go kupić"
