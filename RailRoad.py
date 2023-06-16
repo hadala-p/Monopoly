@@ -5,12 +5,15 @@ class RailRoad(Field):
     def __init__(self, name, position_x, position_y, type, price):
         super().__init__(name, position_x, position_y, type)
         self.price = price
-        self.number_of_houses = 0
-        self.rent = price // 10 + self.number_of_houses * (price // 4)
+        self.rent = 25
         self.owner = None
+        self.value = price
 
     def get_price(self):
         return self.price
+
+    def add_rent(self):
+        self.rent += 25
 
     def get_rent(self):
         return self.rent

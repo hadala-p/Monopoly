@@ -13,7 +13,7 @@ pygame.init()
 screen = GameRatio.screen
 clock = pygame.time.Clock()
 
-path = os.path.join(os.pardir, 'C:/Users/Janno/PycharmProjects/Monopoly_Lenovo/images')
+path = os.path.join(os.pardir, 'C:/Users/Piotrek/PycharmProjects/Monopoly/images/')
 
 game_board_image, IMAGES = load_images()
 

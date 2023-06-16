@@ -11,9 +11,11 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = px, py
         self.current_point = 0
-        self.money = 3000
+        self.money = 10
         self.properties = []
         self.in_jail = False
+        self.is_bankrupt = False
+        self.score = 0
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -43,3 +45,7 @@ class Player(pygame.sprite.Sprite):
 
     def jail_status(self, status):
         self.in_jail = status
+    def set_score(self, amount):
+        self.score += amount
+    def get_score(self):
+        return self.score
