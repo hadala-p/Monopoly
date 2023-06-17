@@ -4,7 +4,7 @@ import pygame
 
 import GameRatio
 
-path = os.path.join(os.pardir, 'C:/Users/Piotrek/PycharmProjects/Monopoly/images')
+path = 'images'
 
 
 def load_images():

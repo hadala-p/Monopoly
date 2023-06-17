@@ -1,115 +1,24 @@
 import pygame
-from pygame import draw
+import pygame.mixer
 
 import GameRatio
-from Chance import Chance
-from CommunityChest import CommunityChest
+from Board import Fields
+from Constants import GAME_BOARD_WIDTH, GAME_BOARD_HEIGHT, BUY_BUTTON_RECT, FONT_SIZE, \
+    PAWN_SIZE
 from Dice import Dice
-from Estate import Estate
-from Field import Field
-from GameRatio import available_width, available_height, calculate_game_board_dimensions, game_board_image, IMAGES
-from IncomeTax import IncomeTax
-from LoadImages import get_dice_images, chance_card_image, chest_card_image
+from GameRatio import available_width, available_height, calculate_game_board_dimensions, IMAGES
+from LoadSounds import play_sound
 from MenuScreen import MenuScreen
 from Player import Player
-from RailRoad import RailRoad
-
-BACKGROUND_COLOR = (255, 240, 220)
-DICE_IMAGES = get_dice_images()
-CHANCE_CARD_IMAGE, CHANCE_CARD_IMAGE_2 = chance_card_image()
-CHEST_CARD_IMAGE, CHEST_CARD_IMAGE_2 = chest_card_image()
+from Ui import draw_message, draw_buy_button, draw_game_board, draw_players_information, animate_dice_roll, \
+    draw_current_field_information, animate_card, draw_card, draw_results
+from Utils import sprawdz_typ_pola
 
 pygame.init()
 screen = GameRatio.screen
 clock = pygame.time.Clock()
 menuscreen = MenuScreen()
 pygame.display.set_caption("Monopoly")
-game_board_width, game_board_height = calculate_game_board_dimensions()
-
-game_board = pygame.transform.scale(game_board_image, (game_board_width, game_board_height))
-game_board_x = int((available_width - game_board_width) / 2)
-game_board_y = int((available_height - game_board_height) / 2)
-
-board_x = available_width // 4
-board_y = int((available_height - game_board_height) / 2)
-PAWN_SIZE = (game_board_width // 13, game_board_height // 13)
-FONT_SIZE = available_height // 30
-buy_button_rect = pygame.Rect(available_width * 0.07, available_height * 0.85,
-                              available_width * 0.1, available_height * 0.05)
-
-
-def sprawdz_typ_pola(indeks_pola):
-    return Fields[indeks_pola].type
-
-
-Fields = [
-    Field("Start", board_x + (game_board_width * 0.9), board_y + game_board_height - PAWN_SIZE[1], "start"),
-    Estate("Białystok", board_x + (game_board_width * 0.8), board_y + game_board_height - PAWN_SIZE[1], "estate",
-           60, (55, 76, 95)),
-    CommunityChest("Skrzynia", board_x + (game_board_width * 0.73), board_y + game_board_height - PAWN_SIZE[1],
-                   "chance"),
-    Estate("Bełchatów", board_x + (game_board_width * 0.64), board_y + game_board_height - PAWN_SIZE[1], "estate",
-           60, (55, 76, 95)),
-    IncomeTax("Podatek", board_x + (game_board_width * 0.56), board_y + game_board_height - PAWN_SIZE[1], "tax", 200),
-    RailRoad("Pociąg Regio", board_x + (game_board_width * 0.48), board_y + game_board_height - PAWN_SIZE[1],
-             "kolejka", 50),
-    Estate("Lublin", board_x + (game_board_width * 0.4), board_y + game_board_height - PAWN_SIZE[1], "estate",
-           100, (190, 202, 218)),
-    Chance("Szansa", board_x + (game_board_width * 0.32), board_y + game_board_height - PAWN_SIZE[1], "chance"),
-    Estate("Katowice", board_x + (game_board_width * 0.25), board_y + game_board_height - PAWN_SIZE[1], "estate", 100,
-           (190, 202, 218)),
-    Estate("Kraków", board_x + (game_board_width * 0.17), board_y + game_board_height - PAWN_SIZE[1], "estate", 120,
-           (190, 202, 218)),
-    Field("Wiezienie", board_x + (game_board_width * 0.05), board_y + game_board_height - PAWN_SIZE[1], "jail"),
-    Estate("Toruń", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.8), "estate", 140,
-           (162, 68, 118)),
-    IncomeTax("Podatek", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.7), "tax", 150),
-    Estate("Elbląg", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.65), "estate", 140,
-           (162, 68, 118)),
-    Estate("Szczecin", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.55), "estate", 160,
-           (162, 68, 118)),
-    RailRoad("Kolejka linowa", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.46), "kolejka",
-             100),
-    Estate("Bydgoszcz", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.38), "estate", 180,
-           (247, 154, 41)),
-    CommunityChest("Skrzynia", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.3),
-                   "chance"),
-    Estate("Tarnów", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.22), "estate", 180,
-           (247, 154, 41)),
-    Estate("Wrocław", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.15), "estate", 200,
-           (247, 154, 41)),
-    Field("Darmowy Parking", board_x + (game_board_width * 0.05), board_y + (game_board_height * 0.03), "parking"),
-    Estate("Kalisz", board_x + (game_board_width * 0.17), board_y + (game_board_height * 0.03), "estate", 220,
-           (253, 0, 0)),
-    Chance("Szansa", board_x + (game_board_width * 0.25), board_y + (game_board_height * 0.03), "chance"),
-    Estate("Gdynia", board_x + (game_board_width * 0.32), board_y + (game_board_height * 0.03), "estate", 220,
-           (253, 0, 0)),
-    Estate("Poznań", board_x + (game_board_width * 0.4), board_y + (game_board_height * 0.03), "estate", 240,
-           (253, 0, 0)),
-    RailRoad("Metro", board_x + (game_board_width * 0.48), board_y + (game_board_height * 0.03), "kolejka", 150),
-    Estate("Opole", board_x + (game_board_width * 0.56), board_y + (game_board_height * 0.03), "estate", 260,
-           (255, 255, 1)),
-    Estate("Katowice", board_x + (game_board_width * 0.64), board_y + (game_board_height * 0.03), "estate", 260,
-           (255, 255, 1)),
-    IncomeTax("Podatek", board_x + (game_board_width * 0.73), board_y + (game_board_height * 0.03), "tax", 150),
-    Estate("Rzeszów", board_x + (game_board_width * 0.8), board_y + (game_board_height * 0.03), "estate", 280,
-           (255, 255, 1)),
-    Field("Więzienie", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.03), "go_to_jail"),
-    Estate("Gdańsk", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.15), "estate", 300,
-           (0, 136, 54)),
-    Estate("", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.22), "estate", 300, (0, 136, 54)),
-    CommunityChest("Skrzynia", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.3),
-                   "chance"),
-    Estate("Kielce", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.38), "estate", 320,
-           (0, 136, 54)),
-    RailRoad("Tramwaj", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.46), "kolejka", 200),
-    Chance("Szansa", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.55), "chance"),
-    Estate("Olsztyn", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.65), "estate", 350,
-           (78, 102, 172)),
-    IncomeTax("Podatek", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.7), "tax", 150),
-    Estate("Warszawa", board_x + (game_board_width * 0.93), board_y + (game_board_height * 0.8), "estate", 400,
-           (78, 102, 172)),
-]
 
 
 class Board:
@@ -121,8 +30,7 @@ class Board:
                               (0, 0, 255): IMAGES['BLUEPAWN'], (255, 255, 0): IMAGES['YELLOWPAWN']}
         self.num_players = num_players
         self.window_open = True
-        self.game_board_width, self.game_board_height = calculate_game_board_dimensions()
-        self.game_board = pygame.transform.scale(game_board_image, (game_board_width, game_board_height))
+        self.GAME_BOARD_WIDTH, self.GAME_BOARD_HEIGHT = calculate_game_board_dimensions()
         self.dice = Dice()
         self.dice_roll_1 = 0
         self.dice_roll_2 = 0
@@ -147,18 +55,18 @@ class Board:
             self.current_player_index = (self.current_player_index + 1) % self.num_players
 
     def roll_dice(self):
-        # self.dice_roll_1 = self.dice.roll()
-        self.dice_roll_1 = 1
-        self.dice_roll_2 = 0
+        self.dice_roll_1 = self.dice.roll()
+        self.dice_roll_2 = self.dice.roll()
+        play_sound("roll_dice")
         self.dice_roll_animation = True
 
     def initialize_players(self):
         for i in range(self.num_players):
             player_image = self.player_images[self.player_colors[i]]
-            player = Player(player_image, self.player_names[i], int(game_board_width * 1.45) - i * 10,
-                            int(game_board_height * 0.9), PAWN_SIZE)
+            player = Player(player_image, self.player_names[i], int(GAME_BOARD_WIDTH * 1.45) - i * 10,
+                            int(GAME_BOARD_HEIGHT * 0.9), PAWN_SIZE)
             if i % 2 == 1:
-                player.rect.move_ip([0, game_board_height // 20])
+                player.rect.move_ip([0, GAME_BOARD_HEIGHT // 20])
             self.players.append(player)
 
     def player_action(self, field_type, player):
@@ -171,6 +79,7 @@ class Board:
                 player.pay_rent(rent)
                 owner.add_money(rent)
                 self.code_message = 1
+
             elif owner is None:
                 self.show_buy_button = True
 
@@ -182,12 +91,14 @@ class Board:
             self.current_card = chance.get_current_card()
             self.card_animation = True
             self.card_action = True
+            play_sound("card")
 
         elif field_type == "go_to_jail":
             self.code_message = 3
             player.current_point = 10
             player.rect.center = Fields[10].get_coordinates()
             player.in_jail = True
+            play_sound("jail")
         elif field_type == "tax":
             tax = current_field.get_tax()
             player.subtract_money(tax)
@@ -199,6 +110,7 @@ class Board:
             chance = current_field
             self.current_card = chance.get_current_card()
             self.card_action = True
+            play_sound("card")
         elif field_type == "kolejka":
             self.show_property_card = True
             owner = current_field.get_owner()
@@ -219,6 +131,7 @@ class Board:
         if player.get_money() < 0:
             player.is_bankrupt = True
             self.code_message = 6
+            play_sound("bankrupt")
 
     def is_enough_players(self):
         players_in_game = 0
@@ -226,30 +139,18 @@ class Board:
             if not player.is_bankrupt:
                 players_in_game += 1
         if players_in_game < 2:
+            play_sound("results")
             self.finish = True
 
     def move_player(self, player):
         if self.dice_roll_1 > 0:
             player.current_point = (player.current_point + 1) % len(Fields)  # Aktualizacja pozycji gracza
 
-            # Przesunięcie pionka o jedno pole za start
-            target_x, target_y = Fields[player.current_point].get_coordinates()
-            dx = target_x - player.rect.centerx
-            dy = target_y - player.rect.centery
-            step_x = dx / 12
-            step_y = dy / 12
-
-            for _ in range(12):
-                player.rect.move_ip([step_x, step_y])
-                pygame.time.wait(20)
-                self.draw_game()
-                clock.tick(60)
-
-            player.rect.center = target_x, target_y
-
             # Przesunięcie pionka po pozostałych polach
             for _ in range(1, self.dice_roll_1 + self.dice_roll_2):
                 player.current_point = (player.current_point + 1) % len(Fields)
+                if player.current_point % 40 == 0:
+                    player.add_money(200)
                 target_x, target_y = Fields[player.current_point].get_coordinates()
                 dx = target_x - player.rect.centerx
                 dy = target_y - player.rect.centery
@@ -263,214 +164,16 @@ class Board:
                     clock.tick(60)
 
                 player.rect.center = target_x, target_y
-
+            play_sound("step")
             # Sprawdzenie typu pola i wykonanie odpowiednich akcji
             self.player_action(sprawdz_typ_pola(player.current_point), player)
 
-    def draw_message(self, code, field, font):
-        if code == 1:
-            message = ("Płacisz " + str(field.get_rent()) + " czynszu")
-
-        elif code == 2:
-            current_card = field.get_current_card()
-            description = current_card.get_description()
-            # message = ("Twoja karta: \n" + description)
-            colletion = [word.split(' ') for word in description.splitlines()]
-            space = font.size(' ')[0]
-            x, y = available_width * 0.35, available_height * 0.4
-            for lines in colletion:
-                for words in lines:
-                    word_surface = font.render(words, True, (0, 0, 0))
-                    word_width, word_height = word_surface.get_size()
-                    if x + word_width >= available_width * 0.65:
-                        x = available_width * 0.35
-                        y += word_height
-                    screen.blit(word_surface, (x, y))
-                    x += word_width + space
-                x = available_width * 0.35
-                y += word_height
-        elif code == 3:
-            message = "Idziesz do więzienia"
-        elif code == 4:
-            tax = field.get_tax()
-            message = ("Płacisz" + str(tax) + "$ podatku")
-        elif code == 6:
-            message = "Gracz" + self.players[self.current_player_index - 1].get_name() + "Bankrutuje"
-            message_text = font.render(message, True, (255, 0, 0))
-            message_rect = message_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
-            screen.blit(message_text, message_rect)
-            pygame.time.wait(2000)
-            self.code_message = 0
-        elif code == 7:
-            message = "Nie masz wystarczająco dużo Pieniędzy!"
-        else:
-            message = ""
-        if code != 2 and code != 6:
-            message_text = font.render(message, True, (0, 0, 0))
-            message_rect = message_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
-            screen.blit(message_text, message_rect)
-
-    def draw_buy_button(self, field_name):
-        draw.rect(screen, (0, 255, 0), buy_button_rect)
-        buy_button_font = pygame.font.Font(None, FONT_SIZE // 2)
-        buy_button_text = buy_button_font.render("Kup " + field_name, True, (255, 255, 255))
-        buy_button_text_rect = buy_button_text.get_rect(center=buy_button_rect.center)
-        screen.blit(buy_button_text, buy_button_text_rect)
-
-    def animate_dice_roll(self, dice_1_dots, dice_2_dots):
-        frames = 20  # Liczba klatek animacji
-        delay = 20  # Opóźnienie między klatkami w milisekundach
-
-        for i in range(frames):
-            self.draw_game_board()
-            for player in self.players:
-                player.draw(screen)
-            if i + 1 == frames:
-                dice_image_1 = DICE_IMAGES[dice_1_dots]
-                dice_image_2 = DICE_IMAGES[dice_2_dots]
-            else:
-                dice_image_1 = DICE_IMAGES[i - 1]
-                dice_image_2 = DICE_IMAGES[frames - i - 2]
-            dice_1_rect = dice_image_1.get_rect(center=(available_width * 0.6, available_height // 2))
-            dice_2_rect = dice_image_1.get_rect(center=(available_width * 0.4, available_height // 2))
-            screen.blit(dice_image_1, dice_1_rect)
-            screen.blit(dice_image_2, dice_2_rect)
-            pygame.time.wait(delay)
-            clock.tick(60)
-            pygame.display.flip()
-        pygame.time.wait(1000)
-        self.dice_roll_animation = False
-
-    def animate_card(self):
-        field_type = self.players[self.current_player_index].get_current_point()
-        if field_type == 7 or field_type == 22 or field_type == 36:
-            image_1 = CHANCE_CARD_IMAGE
-            image_2 = CHANCE_CARD_IMAGE_2
-        else:
-            image_1 = CHEST_CARD_IMAGE
-            image_2 = CHEST_CARD_IMAGE_2
-        frames = 30  # Liczba klatek animacji
-        delay = 30  # Opóźnienie między klatkami w milisekundach
-        for j in range(0, 3):
-            for i in range(frames):
-                self.draw_game_board()
-                for player in self.players:
-                    player.draw(screen)
-                if j == 0:
-                    scaled_image = pygame.transform.scale(image_1, ((GameRatio.get_width() * i) // 80,
-                                                                    GameRatio.get_height() * i // 60))
-                elif j == 1:
-                    scaled_image = pygame.transform.scale(image_1, ((GameRatio.get_width() * (30 - i) // 80),
-                                                                    GameRatio.get_height() // 2))
-                else:
-                    scaled_image = pygame.transform.scale(image_2, ((GameRatio.get_width() * i) // 80,
-                                                                    GameRatio.get_height() // 2))
-                card_rect = scaled_image.get_rect(center=(available_width // 2, available_height // 2))
-                screen.blit(scaled_image, card_rect)
-                pygame.time.wait(delay)
-                clock.tick(60)
-                pygame.display.flip()
-        self.card_animation = False
-        self.show_card = True
-
-    def draw_results(self):
-        screen.fill(BACKGROUND_COLOR)
-        font = pygame.font.Font(None, FONT_SIZE * 4)
-        message = "Podsumowanie gry"
-        message_text = font.render(message, True, (0, 0, 0))
-        message_rect = message_text.get_rect(center=(available_width * 0.5, available_height * 0.1))
-        screen.blit(message_text, message_rect)
-        font = pygame.font.Font(None, FONT_SIZE * 2)
-        space = 0.3
-        for player in self.players:
-            message = player.get_name() + "   " + str(player.get_score())
-            message_text = font.render(message, True, (0, 0, 0))
-            message_rect = message_text.get_rect(center=(available_width * 0.5, available_height * space))
-            screen.blit(message_text, message_rect)
-            space += 0.1
-
-    def draw_card(self):
-        field_type = self.players[self.current_player_index].get_current_point()
-        if field_type == 7 or field_type == 22 or field_type == 36:
-            image = CHANCE_CARD_IMAGE_2
-        else:
-            image = CHEST_CARD_IMAGE_2
-        card_image = pygame.transform.scale(image, ((GameRatio.get_width() * 30) // 80,
-                                                    GameRatio.get_height() // 2))
-        card_rect = card_image.get_rect(center=(available_width // 2, available_height // 2))
-        screen.blit(card_image, card_rect)
-
-    def draw_players_information(self, font):
-        proportion = 0.015
-        temp = 0
-        for player in self.players:
-            current_player = player
-            if current_player.is_bankrupt:
-                current_player_text = font.render("gracz: " + str(current_player.name) + " - BANKRUT", True,
-                                                  self.player_colors[temp])
-            else:
-                current_player_text = font.render("gracz: " + str(current_player.name), True, self.player_colors[temp])
-            current_player_rect = current_player_text.get_rect(
-                center=(available_width * 0.9, available_height * proportion))
-            proportion = proportion + 0.030
-            screen.blit(current_player_text, current_player_rect)
-            money_text = font.render("Pieniądze: " + str(current_player.money), True, (0, 0, 0))
-            money_rect = money_text.get_rect(center=(available_width * 0.9, available_height * proportion))
-            proportion = proportion + 0.030
-            screen.blit(money_text, money_rect)
-            player_properties_text = font.render("Posiadane własności: ", True, (0, 0, 0))
-            player_properties_rect = player_properties_text.get_rect(
-                center=(available_width * 0.9, available_height * proportion))
-            proportion = proportion + 0.030
-            screen.blit(player_properties_text, player_properties_rect)
-            player_properties_text = font.render(", ".join([prop.get_name() for prop in current_player.properties]),
-                                                 True, (0, 0, 0))
-            player_properties_rect = player_properties_text.get_rect(
-                center=(available_width * 0.9, available_height * proportion))
-            proportion = proportion + 0.18
-            screen.blit(player_properties_text, player_properties_rect)
-            temp += 1
-
-    def draw_current_field_information(self, font):
-        current_player = self.players[self.current_player_index]
-        current_field = Fields[current_player.current_point]
-
-        back_rect = pygame.Rect(available_width * 0.021, available_height * 0.35,
-                                available_width * 0.22, available_height * 0.6)
-        draw.rect(screen, (255, 255, 255), back_rect, 0, 20)
-        back_rect = pygame.Rect(available_width * 0.03, available_height * 0.37,
-                                available_width * 0.2, available_height * 0.56)
-        draw.rect(screen, (0, 0, 0), back_rect, 3)
-        back_rect = pygame.Rect(available_width * 0.021, available_height * 0.35,
-                                available_width * 0.22, available_height * 0.6)
-        draw.rect(screen, (0, 0, 0), back_rect, 3, 20)
-        if current_field.get_type() == "estate":
-            back_rect = pygame.Rect(available_width * 0.03, available_height * 0.37,
-                                    available_width * 0.2, available_height * 0.06)
-            draw.rect(screen, current_field.get_color(), back_rect)
-            rent_text = font.render("Rent: " + str(current_field.get_rent()), True, (0, 0, 0))
-            rent_rect = rent_text.get_rect(center=(available_width // 8, available_height * 0.45))
-            screen.blit(rent_text, rent_rect)
-            for number in range(1, 5):
-                rent_text = font.render("With " + str(number) + " house: " +
-                                        str(current_field.get_rent_for_number_of_houses(number)), True, (0, 0, 0))
-                rent_rect = rent_text.get_rect(center=(available_width // 8, available_height * (0.45 + 0.05 * number)))
-                screen.blit(rent_text, rent_rect)
-        field_title_font = pygame.font.Font(None, FONT_SIZE * 2)
-        title_text = field_title_font.render(str(current_field.get_name()), True, (0, 0, 0))
-        title_rect = title_text.get_rect(center=(available_width // 8, available_height * 0.4))
-        screen.blit(title_text, title_rect)
-
-    def draw_game_board(self):
-        screen.fill(BACKGROUND_COLOR)
-        screen.blit(self.game_board, (board_x, board_y))
-
     def draw_game(self):
         font = pygame.font.Font(None, FONT_SIZE)
-        self.draw_game_board()
+        draw_game_board()
         for player in self.players:
             player.draw(screen)
-        self.draw_players_information(font)
+        draw_players_information(font, self.players, self.player_colors)
         current_player = self.players[self.current_player_index]
         current_player_text = font.render("Aktualny gracz: " + str(current_player.name),
                                           True, self.player_colors[self.current_player_index])
@@ -485,19 +188,22 @@ class Board:
         current_field = Fields[self.players[self.current_player_index].current_point]
         # Sprawdź typ pola i wyświetl przycisk kupowania dla pól do kupienia
         if self.show_property_card:
-            self.draw_current_field_information(font)
+            draw_current_field_information(font, self.players, self.current_player_index)
         if self.show_buy_button:
-            self.draw_buy_button(current_field.name)
+            draw_buy_button(current_field.name)
         if self.card_animation:
-            self.animate_card()
+            animate_card(self.players, self.current_player_index)
+            self.card_animation = False
+            self.show_card = True
         if self.show_card:
-            self.draw_card()
+            draw_card(self.players, self.current_player_index)
         if self.code_message:
-            self.draw_message(self.code_message, current_field, font)
+            draw_message(self.code_message, current_field, font, self.players, self.current_player_index)
         if self.dice_roll_animation:
-            self.animate_dice_roll(self.dice_roll_1 - 1, self.dice_roll_2 - 1)
+            animate_dice_roll(self.dice_roll_1 - 1, self.dice_roll_2 - 1, self.players)
+            self.dice_roll_animation = False
         if self.finish:
-            self.draw_results()
+            draw_results(self.players)
 
         pygame.display.flip()
 
@@ -515,6 +221,7 @@ class Board:
                     self.window_open = False
                     pygame.quit()
                 elif event.key == pygame.K_SPACE and not self.waiting_for_input:
+                    self.code_message = 0
                     self.roll_dice()
                     self.move_player(current_player)
                     self.waiting_for_input = True  # Ustawienie flagi oczekiwania na wejście
@@ -532,7 +239,7 @@ class Board:
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
-                if buy_button_rect.collidepoint(mouse_pos):
+                if BUY_BUTTON_RECT.collidepoint(mouse_pos):
                     # Kod wykonujący kupno pola
                     current_player = self.players[self.current_player_index]
                     current_field = Fields[current_player.current_point]
@@ -542,8 +249,12 @@ class Board:
                             current_field.set_owner(current_player)
                             current_player.subtract_money(current_field.get_price())
                             current_player.add_property(current_field)
+                            current_player.set_score(current_field.get_value())
+                            play_sound("buy_property")
+
                     else:
                         self.code_message = 7
+                        play_sound("error")
                 self.show_buy_button = False
 
         for player in self.players:
@@ -551,7 +262,7 @@ class Board:
 
     def start(self):
         self.initialize_players()
-
+        play_sound("game_start")
         while self.window_open:
             self.handle_events()
             self.draw_game()
@@ -561,5 +272,5 @@ class Board:
 # menuscreen.start()
 # game_board_start = Board(len(menuscreen.get_players_name()), menuscreen.get_players_name(),
 #                          menuscreen.get_selected_colors())
-game_board_start = Board(2, ["Piotr", "Angelika"], [(0, 255, 0), (255, 0, 0)])
+game_board_start = Board(3, ["Piotr", "Angelika", "Bartek"], [(0, 255, 0), (255, 0, 0), (0, 0, 255)])
 game_board_start.start()

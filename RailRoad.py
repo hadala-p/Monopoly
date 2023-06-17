@@ -23,3 +23,6 @@ class RailRoad(Field):
 
     def set_owner(self, owner):
         self.owner = owner
+
+    def get_value(self):
+        return self.value

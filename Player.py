@@ -11,7 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = px, py
         self.current_point = 0
-        self.money = 10
+        self.money = 1500
         self.properties = []
         self.in_jail = False
         self.is_bankrupt = False
