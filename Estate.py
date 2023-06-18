@@ -14,6 +14,7 @@ class Estate(Field):
 
     def get_price(self):
         return self.price
+
     def get_value(self):
         return self.value
 
@@ -34,6 +35,9 @@ class Estate(Field):
 
     def buy_home(self):
         self.number_of_houses += 1
+
+    def get_buy_home_price(self):
+        return self.house_price
 
     def get_color(self):
         return self.color

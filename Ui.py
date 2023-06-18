@@ -27,7 +27,8 @@ def draw_game_board():
 def draw_message(code, field, font, players, current_player_index):
     global message, word_height
     if code == 1:
-        message = ("Płacisz " + str(field.get_rent()) + " czynszu")
+        message = (
+        "Płacisz " + str(field.get_rent()) + "$ czynszu!")
 
     elif code == 2:
         current_card = field.get_current_card()
@@ -48,7 +49,7 @@ def draw_message(code, field, font, players, current_player_index):
             x = available_width * 0.35
             y += word_height
     elif code == 3:
-        message = "Idziesz do więzienia"
+        message = "Idziesz do więzienia!"
     elif code == 4:
         tax = field.get_tax()
         message = ("Płacisz" + str(tax) + "$ podatku")

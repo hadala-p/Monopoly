@@ -14,10 +14,10 @@ class Chance(Field):
         self.cards.append(card)
 
     def get_chance_cards(self):
-        return [ChanceCard("Card1", "Przejdź do Warszawa"),
+        return [ChanceCard("Card1", "Przejdź do Warszawy"),
                 ChanceCard("Card2", "Przejdź na Start (Zabierz 200 $)"),
-                ChanceCard("Card3", "Przejdź do Illinois Avenue. Jeśli zdasz Go, odbierz 200 $"),
-                ChanceCard("Card4", "Przejdź do St. Charles Place. Jeśli zdasz Go, odbierz 200 $"),
+                ChanceCard("Card3", "Udaj się do Poznania. Jeśli przejdziesz Start, odbierz 200 $"),
+                ChanceCard("Card4", "Udaj się do torunia. Jeśli przejdziesz Start, odbierz 200 $"),
                 ChanceCard("Card5", "Przejdź do najbliższej linii kolejowej."),
                 ChanceCard("Card6", "Przejdź do najbliższego Narzędzia.."),
                 ChanceCard("Card7", "Bank wypłaca Ci dywidendę w wysokości 50 $"),

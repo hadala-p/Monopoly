@@ -80,7 +80,7 @@ class Board:
                 owner.add_money(rent)
                 self.code_message = 1
 
-            elif owner is None:
+            elif owner is None or owner is player:
                 self.show_buy_button = True
 
         elif field_type == "chance":
@@ -142,6 +142,30 @@ class Board:
             play_sound("results")
             self.finish = True
 
+    def buy_button_action(self):
+        current_player = self.players[self.current_player_index]
+        current_field = Fields[current_player.current_point]
+        if current_player is not current_field.get_owner():
+            if current_player.get_money() >= current_field.get_price():
+                if current_field.get_owner() is None:
+                    # Aktualizacja informacji o polu i graczu
+                    current_field.set_owner(current_player)
+                    current_player.subtract_money(current_field.get_price())
+                    current_player.add_property(current_field)
+                    current_player.set_score(current_field.get_value())
+                    play_sound("buy_property")
+
+            else:
+                self.code_message = 7
+                play_sound("error")
+        elif current_field.get_owner() is current_player:
+            if current_player.get_money() >= current_field.get_buy_home_price():
+                current_field.buy_home()
+                current_player.subtract_money(current_field.get_buy_home_price())
+            else:
+                self.code_message = 7
+                play_sound("error")
+
     def move_player(self, player):
         if self.dice_roll_1 > 0:
             player.current_point = (player.current_point + 1) % len(Fields)  # Aktualizacja pozycji gracza
@@ -170,13 +194,18 @@ class Board:
 
     def draw_game(self):
         font = pygame.font.Font(None, FONT_SIZE)
+        for_for_player_name = pygame.font.Font(None, FONT_SIZE * 2)
         draw_game_board()
         for player in self.players:
             player.draw(screen)
         draw_players_information(font, self.players, self.player_colors)
         current_player = self.players[self.current_player_index]
-        current_player_text = font.render("Aktualny gracz: " + str(current_player.name),
-                                          True, self.player_colors[self.current_player_index])
+        current_player_text = for_for_player_name.render("Aktualny gracz",
+                                                         True, self.player_colors[self.current_player_index])
+        current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_height * 0.1))
+        screen.blit(current_player_text, current_player_rect)
+        current_player_text = for_for_player_name.render(str(current_player.name),
+                                                         True, self.player_colors[self.current_player_index])
         current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_height * 0.2))
         screen.blit(current_player_text, current_player_rect)
 
@@ -198,7 +227,8 @@ class Board:
         if self.show_card:
             draw_card(self.players, self.current_player_index)
         if self.code_message:
-            draw_message(self.code_message, current_field, font, self.players, self.current_player_index)
+            draw_message(self.code_message, current_field, pygame.font.Font(None, FONT_SIZE * 2), self.players,
+                         self.current_player_index)
         if self.dice_roll_animation:
             animate_dice_roll(self.dice_roll_1 - 1, self.dice_roll_2 - 1, self.players)
             self.dice_roll_animation = False
@@ -240,21 +270,7 @@ class Board:
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if BUY_BUTTON_RECT.collidepoint(mouse_pos):
-                    # Kod wykonujący kupno pola
-                    current_player = self.players[self.current_player_index]
-                    current_field = Fields[current_player.current_point]
-                    if current_player.get_money() >= current_field.get_price():
-                        if current_field.get_owner() is None:
-                            # Aktualizacja informacji o polu i graczu
-                            current_field.set_owner(current_player)
-                            current_player.subtract_money(current_field.get_price())
-                            current_player.add_property(current_field)
-                            current_player.set_score(current_field.get_value())
-                            play_sound("buy_property")
-
-                    else:
-                        self.code_message = 7
-                        play_sound("error")
+                    self.buy_button_action()
                 self.show_buy_button = False
 
         for player in self.players:
@@ -272,5 +288,5 @@ class Board:
 # menuscreen.start()
 # game_board_start = Board(len(menuscreen.get_players_name()), menuscreen.get_players_name(),
 #                          menuscreen.get_selected_colors())
-game_board_start = Board(3, ["Piotr", "Angelika", "Bartek"], [(0, 255, 0), (255, 0, 0), (0, 0, 255)])
+game_board_start = Board(2, ["Piotr", "Angelika"], [(0, 255, 0), (255, 0, 0)])
 game_board_start.start()

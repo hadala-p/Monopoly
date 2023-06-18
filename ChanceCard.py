@@ -22,24 +22,30 @@ class ChanceCard:
             current_player.add_money(200)
             play_sound("positive_card")
         elif self.title == "Card3":
-            current_player.current_point = 1
-            current_player.rect.center = fields[1].get_coordinates()
+            current_player.current_point = 24
+            current_player.rect.center = fields[24].get_coordinates()
         elif self.title == "Card4":
-            current_player.current_point = 1
-            current_player.rect.center = fields[1].get_coordinates()
+            current_player.current_point = 11
+            current_player.rect.center = fields[11].get_coordinates()
         elif self.title == "Card5":
             if current_player.current_point == 7:
+                current_player.current_point = 5
                 current_player.rect.center = fields[5].get_coordinates()
             if current_player.current_point == 22:
+                current_player.current_point = 25
                 current_player.rect.center = fields[25].get_coordinates()
             if current_player.current_point == 36:
+                current_player.current_point = 35
                 current_player.rect.center = fields[35].get_coordinates()
         elif self.title == "Card6":
             if current_player.current_point == 7:
+                current_player.current_point = 12
                 current_player.rect.center = fields[12].get_coordinates()
             if current_player.current_point == 22:
+                current_player.current_point = 28
                 current_player.rect.center = fields[28].get_coordinates()
             if current_player.current_point == 36:
+                current_player.current_point = 38
                 current_player.rect.center = fields[38].get_coordinates()
         elif self.title == "Card7":
             current_player.add_money(50)
