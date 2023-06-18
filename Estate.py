@@ -6,7 +6,7 @@ class Estate(Field):
         super().__init__(name, position_x, position_y, type)
         self.price = price
         self.number_of_houses = 0
-        self.rent = price // 10 + self.number_of_houses * price
+        self.rent = price // 10
         self.house_price = price * 0.8
         self.owner = None
         self.color = color
@@ -23,6 +23,9 @@ class Estate(Field):
 
     def get_rent(self):
         return self.rent
+    def set_rent(self):
+        self.rent = self.number_of_houses * self.price + self.price
+
 
     def get_owner(self):
         return self.owner
@@ -35,6 +38,7 @@ class Estate(Field):
 
     def buy_home(self):
         self.number_of_houses += 1
+        self.set_rent()
 
     def get_buy_home_price(self):
         return self.house_price

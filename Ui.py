@@ -2,11 +2,11 @@ import pygame
 from pygame import draw
 
 import GameRatio
-from Board import Fields
 from Constants import BUY_BUTTON_RECT, FONT_SIZE, BACKGROUND_COLOR, BOARD_X, BOARD_Y, DICE_IMAGES, CHANCE_CARD_IMAGE, \
-    CHANCE_CARD_IMAGE_2, CHEST_CARD_IMAGE, CHEST_CARD_IMAGE_2, GAME_BOARD_WIDTH, GAME_BOARD_HEIGHT
+    CHANCE_CARD_IMAGE_2, CHEST_CARD_IMAGE, CHEST_CARD_IMAGE_2, GAME_BOARD_WIDTH, GAME_BOARD_HEIGHT, HOUSE_IMAGE
 from GameRatio import available_width, available_height, screen
 from MenuScreen import clock
+from Utils import Fields
 
 game_board = pygame.transform.scale(GameRatio.game_board_image, (GAME_BOARD_WIDTH, GAME_BOARD_HEIGHT))
 
@@ -14,7 +14,7 @@ game_board = pygame.transform.scale(GameRatio.game_board_image, (GAME_BOARD_WIDT
 def draw_buy_button(field_name):
     draw.rect(screen, (0, 255, 0), BUY_BUTTON_RECT)
     buy_button_font = pygame.font.Font(None, FONT_SIZE // 2)
-    buy_button_text = buy_button_font.render("Kup " + field_name, True, (255, 255, 255))
+    buy_button_text = buy_button_font.render("Kup", True, (255, 255, 255))
     buy_button_text_rect = buy_button_text.get_rect(center=BUY_BUTTON_RECT.center)
     screen.blit(buy_button_text, buy_button_text_rect)
 
@@ -28,7 +28,7 @@ def draw_message(code, field, font, players, current_player_index):
     global message, word_height
     if code == 1:
         message = (
-        "Płacisz " + str(field.get_rent()) + "$ czynszu!")
+                "Płacisz " + str(field.get_rent()) + "$ czynszu!")
 
     elif code == 2:
         current_card = field.get_current_card()
@@ -210,6 +210,10 @@ def draw_current_field_information(font, players, current_player_index):
                                     str(current_field.get_rent_for_number_of_houses(number)), True, (0, 0, 0))
             rent_rect = rent_text.get_rect(center=(available_width // 8, available_height * (0.45 + 0.05 * number)))
             screen.blit(rent_text, rent_rect)
+        for house in range(0, current_field.get_number_of_hauses()):
+            house_image = HOUSE_IMAGE
+            rent_rect = rent_text.get_rect(center=(available_width * (0.1 + house * 0.04), available_height * 0.75))
+            screen.blit(house_image, rent_rect)
     field_title_font = pygame.font.Font(None, FONT_SIZE * 2)
     title_text = field_title_font.render(str(current_field.get_name()), True, (0, 0, 0))
     title_rect = title_text.get_rect(center=(available_width // 8, available_height * 0.4))

@@ -5,26 +5,13 @@ import os
 
 import GameRatio
 from GameRatio import calculate_game_board_dimensions, available_width, available_height
-from LoadImages import load_images
+from LoadImages import load_images, path
 
 BACKGROUND_COLOR = (255, 240, 200)
 
 pygame.init()
 screen = GameRatio.screen
 clock = pygame.time.Clock()
-
-path = os.path.join(os.pardir, 'C:/Users/Piotrek/PycharmProjects/Monopoly/images/')
-
-game_board_image, IMAGES = load_images()
-
-game_board_width, game_board_height = calculate_game_board_dimensions()
-
-game_board = pygame.transform.scale(game_board_image, (game_board_width, game_board_height))
-game_board_x = int((available_width - game_board_width) / 2)
-game_board_y = int((available_height - game_board_height) / 2)
-
-board_x = available_width // 4
-board_y = int((available_height - game_board_height) / 2)
 
 
 class MenuScreen:
@@ -90,7 +77,7 @@ class MenuScreen:
         player_names = []
         font = pygame.font.Font(None, 36)
         text = font.render("Wprowadź nazwy graczy", True, (0, 0, 0))
-        text_rect = text.get_rect(center=(GameRatio.SCREEN_WIDTH // 2, GameRatio.SCREEN_WIDTH // 7 ))
+        text_rect = text.get_rect(center=(GameRatio.SCREEN_WIDTH // 2, GameRatio.SCREEN_WIDTH // 7))
         screen.blit(text, text_rect)
 
         pygame.display.flip()
@@ -147,11 +134,11 @@ class MenuScreen:
 
     def show_start_button(self):
         image = pygame.image.load(os.path.join(path, 'start_background.png')).convert_alpha()
-        scaled = pygame.transform.scale(image, (available_width, available_height ))
+        scaled = pygame.transform.scale(image, (available_width, available_height))
         image = scaled
         image_rect = image.get_rect(center=(available_width // 2, available_height // 2))
-        start_button_rect = pygame.Rect((available_width // 4), (available_height // 4), available_width // 2,
-                                        available_height // 3)
+        start_button_rect = pygame.Rect((available_width * 0.4), (available_height * 0.63), available_width * 0.2,
+                                        available_height * 0.1)
         start_button_color = (0, 255, 0)
         text_color = (0, 0, 0)
 
@@ -189,5 +176,3 @@ class MenuScreen:
             self.color_rects.append(rect)
 
         pygame.display.flip()
-
-

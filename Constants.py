@@ -1,12 +1,13 @@
 import pygame
 
 from GameRatio import available_width, available_height, calculate_game_board_dimensions
-from LoadImages import get_dice_images, chance_card_image, chest_card_image
+from LoadImages import get_dice_images, chance_card_image, chest_card_image, get_house_image
 
 BACKGROUND_COLOR = (255, 240, 220)
 DICE_IMAGES = get_dice_images()
 CHANCE_CARD_IMAGE, CHANCE_CARD_IMAGE_2 = chance_card_image()
 CHEST_CARD_IMAGE, CHEST_CARD_IMAGE_2 = chest_card_image()
+HOUSE_IMAGE = get_house_image()
 GAME_BOARD_WIDTH, GAME_BOARD_HEIGHT = calculate_game_board_dimensions()
 BOARD_X = available_width // 4
 BOARD_Y = int((available_height - GAME_BOARD_HEIGHT) / 2)

@@ -41,3 +41,9 @@ def chest_card_image():
     card_image = pygame.image.load(os.path.join(path, 'community_card.png')).convert_alpha()
     card_image_2 = pygame.image.load(os.path.join(path, 'community_card_2.png')).convert_alpha()
     return card_image, card_image_2
+
+
+def get_house_image():
+    house = pygame.image.load(os.path.join(path, 'house.png')).convert_alpha()
+    scaled_image = pygame.transform.scale(house, (GameRatio.get_width() * 0.05, GameRatio.get_height() * 0.05))
+    return scaled_image
