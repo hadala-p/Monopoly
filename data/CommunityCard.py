@@ -1,4 +1,6 @@
-from LoadSounds import play_sound
+from resources.LoadSounds import play_sound
+
+
 class CommunityCard:
     def __init__(self, title, description):
         self.title = title

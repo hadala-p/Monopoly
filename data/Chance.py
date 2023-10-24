@@ -1,7 +1,7 @@
 import random
 
-from Field import Field
-from ChanceCard import ChanceCard
+from data.ChanceCard import ChanceCard
+from data.Field import Field
 
 
 class Chance(Field):
@@ -39,4 +39,3 @@ class Chance(Field):
         random_number = random.randint(0, len(self.cards) - 1)
         self.current_card_index = random_number
         return self.cards[random_number]
-

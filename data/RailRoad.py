@@ -1,4 +1,4 @@
-from Field import Field
+from data.Field import Field
 
 
 class RailRoad(Field):

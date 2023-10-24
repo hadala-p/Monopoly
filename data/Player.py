@@ -1,5 +1,3 @@
-from turtledemo import clock
-
 import pygame
 
 
@@ -19,6 +17,7 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
     def get_name(self):
         return self.name
 
@@ -45,7 +44,9 @@ class Player(pygame.sprite.Sprite):
 
     def jail_status(self, status):
         self.in_jail = status
+
     def set_score(self, amount):
         self.score += amount
+
     def get_score(self):
         return self.score

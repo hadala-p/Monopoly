@@ -1,13 +1,13 @@
 import pygame
 
 from Constants import GAME_BOARD_WIDTH, GAME_BOARD_HEIGHT, PAWN_SIZE, BUY_BUTTON_RECT, FONT_SIZE
-from Dice import Dice
-from GameRatio import IMAGES, calculate_game_board_dimensions, screen, available_width, available_height
-from LoadSounds import play_sound
-from Player import Player
-from Ui import draw_game_board, draw_players_information, draw_current_field_information, draw_buy_button, \
-    animate_card, draw_card, draw_message, animate_dice_roll, draw_results
-from Utils import sprawdz_typ_pola, clock, Fields
+from data.Dice import Dice
+from data.Player import Player
+from logic.GameRatio import IMAGES, calculate_game_board_dimensions
+from logic.Ui import draw_current_field_information, draw_buy_button, \
+    animate_card, draw_card, draw_message, animate_dice_roll, draw_results, draw_current_player_information
+from logic.Utils import sprawdz_typ_pola, clock, Fields
+from resources.LoadSounds import play_sound
 
 
 class Board:
@@ -183,25 +183,8 @@ class Board:
 
     def draw_game(self):
         font = pygame.font.Font(None, FONT_SIZE)
-        for_for_player_name = pygame.font.Font(None, FONT_SIZE * 2)
-        draw_game_board()
-        for player in self.players:
-            player.draw(screen)
-        draw_players_information(font, self.players, self.player_colors)
-        current_player = self.players[self.current_player_index]
-        current_player_text = for_for_player_name.render("Aktualny gracz",
-                                                         True, self.player_colors[self.current_player_index])
-        current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_height * 0.1))
-        screen.blit(current_player_text, current_player_rect)
-        current_player_text = for_for_player_name.render(str(current_player.name),
-                                                         True, self.player_colors[self.current_player_index])
-        current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_height * 0.2))
-        screen.blit(current_player_text, current_player_rect)
-
-        text = font.render("Wyrzucone oczka: " + str(self.dice_roll_1) + " oraz " + str(self.dice_roll_2),
-                           True, (0, 0, 0))
-        text_rect = text.get_rect(center=(available_width // 8, available_height * 0.3))
-        screen.blit(text, text_rect)
+        draw_current_player_information(font, self.players, self.player_colors, self.current_player_index,
+                                        self.dice_roll_1, self.dice_roll_2)
 
         current_field = Fields[self.players[self.current_player_index].current_point]
         # Sprawdź typ pola i wyświetl przycisk kupowania dla pól do kupienia

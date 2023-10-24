@@ -2,7 +2,7 @@ import os
 
 import pygame
 
-import GameRatio
+from logic import GameRatio
 
 path = 'images'
 

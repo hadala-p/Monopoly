@@ -1,12 +1,12 @@
 import pygame
 from pygame import draw
 
-import GameRatio
 from Constants import BUY_BUTTON_RECT, FONT_SIZE, BACKGROUND_COLOR, BOARD_X, BOARD_Y, DICE_IMAGES, CHANCE_CARD_IMAGE, \
     CHANCE_CARD_IMAGE_2, CHEST_CARD_IMAGE, CHEST_CARD_IMAGE_2, GAME_BOARD_WIDTH, GAME_BOARD_HEIGHT, HOUSE_IMAGE
-from GameRatio import available_width, available_height, screen
-from MenuScreen import clock
-from Utils import Fields
+from logic import GameRatio
+from logic.GameRatio import available_width, available_height, screen
+from logic.MenuScreen import clock
+from logic.Utils import Fields
 
 game_board = pygame.transform.scale(GameRatio.game_board_image, (GAME_BOARD_WIDTH, GAME_BOARD_HEIGHT))
 
@@ -67,6 +67,28 @@ def draw_message(code, field, font, players, current_player_index):
         message_text = font.render(message, True, (0, 0, 0))
         message_rect = message_text.get_rect(center=(available_width * 0.5, available_width // 4 + 50))
         screen.blit(message_text, message_rect)
+
+
+def draw_current_player_information(font, players, player_colors, current_player_index, dice_1, dice_2):
+    for_for_player_name = pygame.font.Font(None, FONT_SIZE * 2)
+    draw_game_board()
+    for player in players:
+        player.draw(screen)
+    draw_players_information(font, players, player_colors)
+    current_player = players[current_player_index]
+    current_player_text = for_for_player_name.render("Aktualny gracz",
+                                                     True, player_colors[current_player_index])
+    current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_height * 0.1))
+    screen.blit(current_player_text, current_player_rect)
+    current_player_text = for_for_player_name.render(str(current_player.name),
+                                                     True, player_colors[current_player_index])
+    current_player_rect = current_player_text.get_rect(center=(available_width // 8, available_height * 0.2))
+    screen.blit(current_player_text, current_player_rect)
+
+    text = font.render("Wyrzucone oczka: " + str(dice_1) + " oraz " + str(dice_2),
+                       True, (0, 0, 0))
+    text_rect = text.get_rect(center=(available_width // 8, available_height * 0.3))
+    screen.blit(text, text_rect)
 
 
 def animate_dice_roll(dice_1_dots, dice_2_dots, players):

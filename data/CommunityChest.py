@@ -1,7 +1,7 @@
 import random
 
-from CommunityCard import CommunityCard
-from Field import Field
+from data.CommunityCard import CommunityCard
+from data.Field import Field
 
 
 class CommunityChest(Field):

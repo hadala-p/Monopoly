@@ -1,7 +1,7 @@
 import pygame
 
-from GameRatio import available_width, available_height, calculate_game_board_dimensions
-from LoadImages import get_dice_images, chance_card_image, chest_card_image, get_house_image
+from logic.GameRatio import calculate_game_board_dimensions, available_width, available_height
+from resources.LoadImages import get_dice_images, chance_card_image, chest_card_image, get_house_image
 
 BACKGROUND_COLOR = (255, 240, 220)
 DICE_IMAGES = get_dice_images()

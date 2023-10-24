@@ -1,16 +1,19 @@
 import pygame
 
-from Chance import Chance
-from CommunityChest import CommunityChest
 from Constants import BOARD_X, GAME_BOARD_WIDTH, BOARD_Y, GAME_BOARD_HEIGHT, PAWN_SIZE
-from Estate import Estate
-from Field import Field
-from IncomeTax import IncomeTax
-from RailRoad import RailRoad
+from data.Chance import Chance
+from data.CommunityChest import CommunityChest
+from data.Estate import Estate
+from data.Field import Field
+from data.IncomeTax import IncomeTax
+from data.RailRoad import RailRoad
 
 clock = pygame.time.Clock()
+
+
 def sprawdz_typ_pola(indeks_pola):
     return Fields[indeks_pola].type
+
 
 Fields = [
     Field("Start", BOARD_X + (GAME_BOARD_WIDTH * 0.9), BOARD_Y + GAME_BOARD_HEIGHT - PAWN_SIZE[1], "start"),

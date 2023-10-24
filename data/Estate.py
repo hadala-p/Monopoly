@@ -1,4 +1,4 @@
-from Field import Field
+from data.Field import Field
 
 
 class Estate(Field):
@@ -23,9 +23,9 @@ class Estate(Field):
 
     def get_rent(self):
         return self.rent
+
     def set_rent(self):
         self.rent = self.number_of_houses * self.price + self.price
-
 
     def get_owner(self):
         return self.owner

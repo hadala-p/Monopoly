@@ -1,11 +1,11 @@
+import os
 import sys
 
 import pygame
-import os
 
-import GameRatio
-from GameRatio import calculate_game_board_dimensions, available_width, available_height
-from LoadImages import load_images, path
+from logic import GameRatio
+from logic.GameRatio import available_width, available_height
+from resources.LoadImages import path
 
 BACKGROUND_COLOR = (255, 240, 200)
 
