@@ -1,5 +1,4 @@
 # Monopoly
-Study assigment
 ![alt text](https://github.com/hadala-p/Monopoly/blob/master/monopoly_picture_1.png?raw=true)
 Monopoly is a classic board game loved by people of all ages. But if you’ve never played before, you might need some help. 
 #Rules
