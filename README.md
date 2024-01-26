@@ -1,4 +1,9 @@
 # Monopoly
+<div align="center" >
+  <img src="https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/PyCharm-000000.svg?style=for-the-badge&logo=PyCharm&logoColor=white"/>
+</div>
+
 ![alt text](https://github.com/hadala-p/Monopoly/blob/master/monopoly_picture_1.png?raw=true)
 Monopoly is a classic board game loved by people of all ages. But if you’ve never played before, you might need some help. 
 #Rules
