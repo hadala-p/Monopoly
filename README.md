@@ -2,6 +2,7 @@
 <div align="center" >
   <img src="https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white"/>
   <img src="https://img.shields.io/badge/PyCharm-000000.svg?style=for-the-badge&logo=PyCharm&logoColor=white"/>
+  <img src="https://img.shields.io/badge/GitHub-181717.svg?style=for-the-badge&logo=GitHub&logoColor=white"/>
 </div>
 
 ![alt text](https://github.com/hadala-p/Monopoly/blob/master/monopoly_picture_1.png?raw=true)
